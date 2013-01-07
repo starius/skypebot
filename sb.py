@@ -11,6 +11,7 @@ import Skype4Py
 
 URL_RE = r'https?://[^\s"\']+'
 TITLE_RE = r'<title>\s*([^\n]+)\s*</title>'
+ARTICLE_RE = r'\[\[[^\n\[\]]+\]\]'
 
 # comment following lines to get url directly (without tor)
 socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS5, "127.0.0.1", 9050) # tor
@@ -23,6 +24,12 @@ good = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабв
 good = set(unicode(good, "utf-8"))
 
 replace = unicode("—- –-", "utf-8")
+
+WIKIS = (
+    'http://urbanculture.in/',
+    'https://lurkmore.to/',
+    'https://ru.wikipedia.org/wiki/',
+)
 
 def get_html(res):
     html = res.read()
@@ -60,10 +67,28 @@ def reply_http_links(Message):
         except Exception, e:
             print('error getting ' + url + ' ' + str(e))
 
+def reply_wiki_links(Message):
+    text = Message.Body
+    for article in list(re.findall(ARTICLE_RE, text))[:10]:
+        article = article[2:-2] # strip [[ and ]]
+        for wiki in WIKIS:
+            url = wiki + article
+            req = urllib2.Request(url, None, headers)
+            try:
+                urllib2.urlopen(req)
+                resp = url
+                if type(title) == str:
+                    title = unicode(title, "utf-8")
+                Message.Chat.SendMessage(resp)
+                break
+            except:
+                pass
+
 class MySkypeEvents:
     def MessageStatus(self, Message, Status):
         if Status == Skype4Py.enums.cmsReceived:
             reply_http_links(Message)
+            reply_wiki_links(Message)
 
 skype = Skype4Py.Skype(Events=MySkypeEvents())
 skype.Attach()
