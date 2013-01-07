@@ -45,12 +45,15 @@ def get_html(res):
     if 'charset=' in res.headers['content-type']:
         encoding = res.headers['content-type'].split('charset=')[-1]
         html = unicode(html, encoding)
+    return html
+
+def fix_title(title):
     for from_to in replace.split():
         f = from_to[0]
         t = from_to[1]
-        html = html.replace(f, t)
-    html = ''.join(c for c in html if c in good or ord(c) < 128)
-    return html
+        title = title.replace(f, t)
+    title = ''.join(c for c in title if c in good or ord(c) < 128)
+    return title
 
 def reply_http_links(Message):
     text = Message.Body
@@ -67,7 +70,7 @@ def reply_http_links(Message):
             except:
                 title = re.search(TITLE_RE, html).groups()[0]
             if title:
-                Message.Chat.SendMessage('URL title: <%s>' % title)
+                Message.Chat.SendMessage('URL title: <%s>' % fix_title(title))
         except Exception, e:
             print('error getting ' + url + ' ' + str(e))
 
