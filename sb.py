@@ -12,6 +12,7 @@ from cStringIO import StringIO
 import Skype4Py
 
 URL_RE = r'https?://[^\s"\']+'
+CHARSET_RE = r'charset=([^\s\'\"]+)[\'\"]'
 TITLE_RE = r'<title>\s*([^\n]+)\s*</title>'
 ARTICLE_RE = r'\[\[[^\n\[\]]+\]\]'
 
@@ -44,6 +45,12 @@ def get_html(res):
     encoding = ''
     if 'charset=' in res.headers['content-type']:
         encoding = res.headers['content-type'].split('charset=')[-1]
+    if not encoding:
+        try:
+            encoding = re.search(CHARSET_RE, html).groups()[0]
+        except:
+            pass
+    if encoding:
         html = unicode(html, encoding)
     return html
 
