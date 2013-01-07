@@ -4,6 +4,7 @@ import re
 import socks
 import socket
 import urllib2
+import httplib2
 from xml.etree.cElementTree import parse, ElementTree, Element, SubElement
 from cStringIO import StringIO
 
@@ -31,6 +32,12 @@ WIKIS = (
     'https://ru.wikipedia.org/wiki/',
 )
 
+def get_res(url):
+    url = httplib2.iri2uri(url)
+    req = urllib2.Request(url, None, headers)
+    res = urllib2.urlopen(req)
+    return res
+
 def get_html(res):
     html = res.read()
     encoding = ''
@@ -50,8 +57,7 @@ def reply_http_links(Message):
         if re.match('.+(jpg|jpeg|gif|png)$', url.lower()):
             continue
         try:
-            req = urllib2.Request(url, None, headers)
-            res = urllib2.urlopen(req)
+            res = get_res(url)
             html = get_html(res)
             title = ''
             try:
@@ -70,9 +76,8 @@ def reply_wiki_links(Message):
         article = article[2:-2] # strip [[ and ]]
         for wiki in WIKIS:
             url = wiki + article
-            req = urllib2.Request(url, None, headers)
             try:
-                urllib2.urlopen(req)
+                get_res(url)
                 Message.Chat.SendMessage(url)
                 break
             except:
