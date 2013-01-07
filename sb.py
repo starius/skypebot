@@ -55,7 +55,7 @@ def get_html(res):
 def reply_http_links(Message):
     text = Message.Body
     for url in list(re.findall(URL_RE, text))[:10]:
-        if re.match('.+(jpg|jpeg|gif|png)$', url.lower()):
+        if re.match('.+(jpg|jpeg|gif|png|pdf)$', url.lower()):
             continue
         try:
             res = get_res(url)
