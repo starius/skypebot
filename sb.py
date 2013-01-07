@@ -37,30 +37,33 @@ def get_html(res):
     html = ''.join(c for c in html if c in good or ord(c) < 128)
     return html
 
+def reply_http_links(Message):
+    text = Message.Body
+    for url in list(re.findall(URL_RE, text))[:10]:
+        if re.match('.+(jpg|jpeg|gif|png)$', url.lower()):
+            continue
+        try:
+            req = urllib2.Request(url, None, headers)
+            res = urllib2.urlopen(req)
+            html = get_html(res)
+            title = ''
+            try:
+                xml = parse(StringIO(html))
+                title = xml.getroot().find('head').find('title').text
+            except:
+                title = re.search(TITLE_RE, html).groups()[0]
+            if title:
+                resp = 'URL title: <%s>' % title
+                if type(title) == str:
+                    title = unicode(title, "utf-8")
+                Message.Chat.SendMessage(resp)
+        except Exception, e:
+            print('error getting ' + url + ' ' + str(e))
+
 class MySkypeEvents:
     def MessageStatus(self, Message, Status):
         if Status == Skype4Py.enums.cmsReceived:
-            text = Message.Body
-            for url in list(re.findall(URL_RE, text))[:10]:
-                if re.match('.+(jpg|jpeg|gif|png)$', url.lower()):
-                    continue
-                try:
-                    req = urllib2.Request(url, None, headers)
-                    res = urllib2.urlopen(req)
-                    html = get_html(res)
-                    title = ''
-                    try:
-                        xml = parse(StringIO(html))
-                        title = xml.getroot().find('head').find('title').text
-                    except:
-                        title = re.search(TITLE_RE, html).groups()[0]
-                    if title:
-                        resp = 'URL title: <%s>' % title
-                        if type(title) == str:
-                            title = unicode(title, "utf-8")
-                        Message.Chat.SendMessage(resp)
-                except Exception, e:
-                    print('error getting ' + url + ' ' + str(e))
+            reply_http_links(Message)
 
 skype = Skype4Py.Skype(Events=MySkypeEvents())
 skype.Attach()
