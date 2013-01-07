@@ -60,10 +60,7 @@ def reply_http_links(Message):
             except:
                 title = re.search(TITLE_RE, html).groups()[0]
             if title:
-                resp = 'URL title: <%s>' % title
-                if type(title) == str:
-                    title = unicode(title, "utf-8")
-                Message.Chat.SendMessage(resp)
+                Message.Chat.SendMessage('URL title: <%s>' % title)
         except Exception, e:
             print('error getting ' + url + ' ' + str(e))
 
@@ -76,10 +73,7 @@ def reply_wiki_links(Message):
             req = urllib2.Request(url, None, headers)
             try:
                 urllib2.urlopen(req)
-                resp = url
-                if type(title) == str:
-                    title = unicode(title, "utf-8")
-                Message.Chat.SendMessage(resp)
+                Message.Chat.SendMessage(url)
                 break
             except:
                 pass
