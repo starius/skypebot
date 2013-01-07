@@ -5,6 +5,7 @@ import socks
 import socket
 import urllib2
 import httplib2
+import random
 from xml.etree.cElementTree import parse, ElementTree, Element, SubElement
 from cStringIO import StringIO
 
@@ -83,11 +84,16 @@ def reply_wiki_links(Message):
             except:
                 pass
 
+def reply_smile(Message):
+    if random.randint(0, 20) == 0:
+        Message.Chat.SendMessage(':3')
+
 class MySkypeEvents:
     def MessageStatus(self, Message, Status):
         if Status == Skype4Py.enums.cmsReceived:
             reply_http_links(Message)
             reply_wiki_links(Message)
+            reply_smile(Message)
 
 skype = Skype4Py.Skype(Events=MySkypeEvents())
 skype.Attach()
