@@ -20,8 +20,11 @@ ARTICLE_RE = r'\[\[[^\n\[\]]+\]\]'
 socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS5, "127.0.0.1", 9050) # tor
 socket.socket = socks.socksocket
 
-# change user-agent (some sites block urllib2)
-headers = {'User-Agent' : 'Mozilla/5.0'}
+headers = {
+    'User-Agent': 'Mozilla/5.0', # change user-agent (some sites block urllib2)
+    'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+    'Accept-Language': 'ru,en-US;q=0.8,en;q=0.6',
+}
 
 good = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя"
 good = set(unicode(good, "utf-8"))
