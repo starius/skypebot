@@ -75,6 +75,7 @@ def reply_wiki_links(Message):
     text = Message.Body
     for article in list(re.findall(ARTICLE_RE, text))[:10]:
         article = article[2:-2] # strip [[ and ]]
+        article = article.replace(' ', '_')
         for wiki in WIKIS:
             url = wiki + article
             try:
