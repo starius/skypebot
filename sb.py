@@ -16,6 +16,7 @@ URL_RE = r'https?://[^\s"\']+'
 CHARSET_RE = r'charset=([^\s\'\"]+)[\'\"]'
 TITLE_RE = r'<title>\s*([^\n]+)\s*</title>'
 ARTICLE_RE = r'\[\[[^\n\[\]]+\]\]'
+IP_RE = r'\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b'
 
 if '--tor' in sys.argv:
     socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS5, "127.0.0.1", 9050)
@@ -118,12 +119,19 @@ def reply_smile(Message):
     if random.randint(0, 20) == 0:
         Message.Chat.SendMessage(':3')
 
+def reply_ip(Message):
+    text = Message.Body
+    for ip in list(re.findall(IP_RE, text))[:10]:
+        name = socket.gethostbyaddr(ip)[0]
+        Message.Chat.SendMessage(name + ' => ' + ip)
+
 class MySkypeEvents:
     def MessageStatus(self, Message, Status):
         if Status == Skype4Py.enums.cmsReceived:
             reply_http_links(Message)
             reply_wiki_links(Message)
             reply_smile(Message)
+            reply_ip(Message)
 
 skype = Skype4Py.Skype(Events=MySkypeEvents())
 skype.Attach()
