@@ -12,7 +12,7 @@ from cStringIO import StringIO
 
 import Skype4Py
 
-URL_RE = r'https?://[^\s"\']+'
+URL_RE = r'\b(https?://|www\.)[^\s"\']+'
 CHARSET_RE = r'charset=([^\s\'\"]+)[\'\"]'
 TITLE_RE = r'<title>\s*(.+)\s*</title>'
 ARTICLE_RE = (
@@ -162,9 +162,12 @@ def fix_title(title):
 
 def reply_http_links(Message):
     text = Message.Body
-    for url in list(re.findall(URL_RE, text))[:10]:
+    for url in list(re.finditer(URL_RE, text))[:10]:
+        url =  url.group()
         if re.match('.+(jpg|jpeg|gif|png|pdf)$', url.lower()):
             continue
+        if not url.startswith('http'):
+            url = 'http://' + url
         print 'Get URL ' + url
         res = get_res(url)
         html = get_html(res)
