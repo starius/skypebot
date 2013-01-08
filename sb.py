@@ -161,6 +161,7 @@ def get_wiki_prefix_resp(article):
                 prefix1 = u(prefix + sep)
                 if article.lower().startswith(prefix1.lower()):
                     article = article[len(prefix1):]
+                    article = article.strip()
                     url = url_prefix + article
                     return prepare_wiki_resp(name, article, url)
 
