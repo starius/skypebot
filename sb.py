@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import os
 import datetime
 import re
 import socket
@@ -11,6 +12,7 @@ from xml.etree.cElementTree import parse, ElementTree, Element, SubElement
 from cStringIO import StringIO
 
 import Skype4Py
+import bitly
 
 URL_RE = r'\b(https?://|www\.)[^\s"\']+'
 CHARSET_RE = r'charset=([^\s\'\"]+)[\'\"]'
@@ -28,6 +30,9 @@ if '--tor' in sys.argv:
     import socks
     socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS5, "127.0.0.1", 9050)
     socket.socket = socks.socksocket
+
+BITLY_USERNAME = os.environ.get('BITLY_USERNAME')
+BITLY_KEY = os.environ.get('BITLY_KEY')
 
 headers = {
     'User-Agent': 'Mozilla/5.0', # change user-agent (some sites block urllib2)
@@ -191,6 +196,8 @@ def prepare_wiki_resp(name, article, url):
     article = article.replace('_', ' ')
     url = url.replace(' ', '%20')
     url = httplib2.iri2uri(url)
+    if len(url) > 40 and BITLY_USERNAME and BITLY_KEY:
+        url = bitly.Api(login=BITLY_USERNAME, apikey=BITLY_KEY).shorten(url)
     resp = name + ': ' + article + ' ' + url
     return '/me ' + resp
 

@@ -3,3 +3,8 @@ sudo aptitude install python-skype
 for tor:
     sudo aptitude install python-socks
 
+to make bit.y shortener work:
+    register an account at http://bit.ly/a/account
+    get API key here: http://bitly.com/a/your_api_key
+    set environment vars BITLY_USERNAME and BITLY_KEY
+
