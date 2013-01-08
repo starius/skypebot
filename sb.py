@@ -58,7 +58,7 @@ replace = (
 )
 
 WIKIS = (
-    (('u', 'калча', 'ук', 'urbanculture'),
+    (('uc', 'калча', 'ук', 'urbanculture'),
         'Urbanculture', 'http://urbanculture.in/'),
     (('l', 'lm', 'лурк', 'лурка', 'лурочка', 'Луркоморье', 'lurk', 'lurka'),
         'Lurkmore', 'https://lurkmore.to/'),
