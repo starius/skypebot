@@ -58,11 +58,14 @@ replace = (
 )
 
 WIKIS = (
-    ('u', 'Urbanculture', 'http://urbanculture.in/'),
-    ('l', 'Lurkmore', 'https://lurkmore.to/'),
-    ('rw', 'Русская Википедия', 'https://ru.wikipedia.org/wiki/'),
-    ('wr', 'Викиреальность', 'http://wikireality.ru/wiki/'),
-    ('w', 'Wikipedia', 'https://en.wikipedia.org/wiki/'),
+    (('u', 'калча', 'ук'), 'Urbanculture', 'http://urbanculture.in/'),
+    (('l', 'lm', 'лурк', 'лурка', 'лурочка', 'lurk', 'lurka'),
+        'Lurkmore', 'https://lurkmore.to/'),
+    (('rw', 'вики', 'рв', 'рувики'),
+        'Русская Википедия', 'https://ru.wikipedia.org/wiki/'),
+    (('wr', 'вр', 'викиреальность'),
+        'Викиреальность', 'http://wikireality.ru/wiki/'),
+    (('w', 'wiki', 'enwiki'), 'Wikipedia', 'https://en.wikipedia.org/wiki/'),
 )
 
 SMILES = (
@@ -90,6 +93,12 @@ SMILES = (
     ("(drunk)", 2),
     ("(facepalm)", 2),
 )
+
+def u(s):
+    if type(s) == str:
+        return unicode(s, 'utf-8')
+    else:
+        return s
 
 def get_res(url):
     url = httplib2.iri2uri(url)
@@ -137,6 +146,33 @@ def reply_http_links(Message):
         if title:
             Message.Chat.SendMessage('URL title: <%s>' % fix_title(title))
 
+def prepare_wiki_resp(name, article, url):
+    name = unicode(name, 'utf-8')
+    article = article.replace('_', ' ')
+    url = httplib2.iri2uri(url)
+    resp = name + ': ' + article + ' ' + url
+    return '/me ' + resp
+
+def get_wiki_resp(article):
+    article = article.strip()
+    for prefixs, name, url_prefix  in WIKIS:
+        for prefix in prefixs:
+            for sep in [' ', ':']:
+                prefix1 = prefix + sep
+                article1 = re.sub(u('^' + prefix1), '', u(article), re.I)
+                if article1 != article:
+                    article = article1
+                    url = url_prefix + article
+                    return prepare_wiki_resp(name, article, url)
+    for prefixs, name, url_prefix  in WIKIS:
+        url = url_prefix + article
+        try:
+            print 'Try ' + url
+            get_res(url)
+            return prepare_wiki_resp(name, article, url)
+        except:
+            pass
+
 def reply_wiki_links(Message):
     text = Message.Body
     articles = []
@@ -144,31 +180,9 @@ def reply_wiki_links(Message):
         a_re = unicode(a_re, 'utf-8')
         articles += re.findall(a_re, text)
     for article in articles[:10]:
-        article = article.replace(' ', '_')
-        resp = ''
-        for prefix, name, url_prefix  in WIKIS:
-            prefix = prefix + ':'
-            if article.lower().startswith(prefix):
-                article = re.sub('^' + prefix, '', article)
-                url = url_prefix + article
-                resp = True
-                break
-        if not resp:
-            for prefix, name, url_prefix  in WIKIS:
-                url = url_prefix + article
-                try:
-                    print 'Try ' + url
-                    get_res(url)
-                    resp = True
-                    break
-                except:
-                    pass
+        resp = get_wiki_resp(article)
         if resp:
-            name = unicode(name, 'utf-8')
-            article = article.replace('_', ' ')
-            url = httplib2.iri2uri(url)
-            resp = name + ': ' + article + ' ' + url
-            Message.Chat.SendMessage('/me ' + resp)
+            Message.Chat.SendMessage(resp)
 
 def weighted_choice(s):
     return random.choice(sum(([v]*wt for v,wt in s),[]))
