@@ -181,7 +181,7 @@ def reply_http_links(Message):
 def prepare_wiki_resp(name, article, url):
     name = unicode(name, 'utf-8')
     article = article.replace('_', ' ')
-    url = url.replace(' ', '_')
+    url = url.replace(' ', '%20')
     url = httplib2.iri2uri(url)
     resp = name + ': ' + article + ' ' + url
     return '/me ' + resp
