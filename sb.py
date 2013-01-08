@@ -96,6 +96,15 @@ SMILES = (
     ("(facepalm)", 2),
 )
 
+RANDOM = (
+    u'случайная',
+    u'случайный',
+    u'случайное',
+    u'рандом',
+    u'random',
+    u'рандомная',
+)
+
 def u(s):
     if type(s) == str:
         return unicode(s, 'utf-8')
@@ -165,6 +174,8 @@ def get_wiki_prefix_resp(article):
                 if article.lower().startswith(prefix1.lower()):
                     article = article[len(prefix1):]
                     article = article.strip()
+                    if article.lower() in RANDOM:
+                        article = 'Special:Random'
                     url = url_prefix + article
                     return prepare_wiki_resp(name, article, url)
 
