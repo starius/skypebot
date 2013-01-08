@@ -165,7 +165,9 @@ def reply_wiki_links(Message):
                     pass
         if resp:
             name = unicode(name, 'utf-8')
-            resp = name + ': ' + article.replace('_', ' ') + ' ' + url
+            article = article.replace('_', ' ')
+            url = httplib2.iri2uri(url)
+            resp = name + ': ' + article + ' ' + url
             Message.Chat.SendMessage('/me ' + resp)
 
 def weighted_choice(s):
