@@ -76,6 +76,8 @@ WIKIS = (
     (('gt', 'translate'), "Google Tranlate",
         'http://translate.google.com/#auto|ru|'),
     (('mt', 'multitran'), "Multitran", 'http://www.multitran.ru/c/m.exe?s='),
+    (('webster', ), "Free Merriam-Webster Dictionary",
+        'http://www.merriam-webster.com/dictionary/')
 )
 
 SMILES = (
