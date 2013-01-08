@@ -330,14 +330,28 @@ def treat_message(self):
     reply_ip(self)
     reply_help(self)
 
+def greet_new(self):
+    self.send(HELP_SHORT)
+
 class SkypeMessage(object):
     pass
 
 class MySkypeEvents:
 
     last = datetime.datetime.now()
+    chat2len = {}
+
+    def ChatMembersChanged(self, Chat, Message):
+        if Chat in self.chat2len and len(Chat.Members) > self.chat2len[Chat]:
+            m = SkypeMessage()
+            def send(txt):
+                Chat.SendMessage(u(txt))
+            m.send = send
+            greet_new(m)
+        self.chat2len[Chat] = len(Chat.Members)
 
     def MessageStatus(self, Message, Status):
+        self.chat2len[Message.Chat] = len(Message.Chat.Members)
         if Message.Sender != skype.CurrentUser and Message.Datetime > self.last:
             self.last = Message.Datetime
             m = SkypeMessage()
