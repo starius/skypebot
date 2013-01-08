@@ -14,7 +14,7 @@ import Skype4Py
 
 URL_RE = r'https?://[^\s"\']+'
 CHARSET_RE = r'charset=([^\s\'\"]+)[\'\"]'
-TITLE_RE = r'<title>\s*([^\n]+)\s*</title>'
+TITLE_RE = r'<title>\s*(.+)\s*</title>'
 ARTICLE_RE = r'\[\[[^\n\[\]]+\]\]'
 IP_RE = r'\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b'
 
@@ -83,7 +83,8 @@ def reply_http_links(Message):
             xml = parse(StringIO(html))
             title = xml.getroot().find('head').find('title').text
         except:
-            title = re.search(TITLE_RE, html).groups()[0]
+            title = re.search(TITLE_RE, html, re.DOTALL).groups()[0]
+            title = re.sub(r'\s+', ' ', title)
         if title:
             Message.Chat.SendMessage('URL title: <%s>' % fix_title(title))
 
