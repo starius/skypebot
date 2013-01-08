@@ -163,8 +163,8 @@ def fix_title(title):
     title = ''.join(c for c in title if c in good or ord(c) < 128)
     return title
 
-def reply_http_links(Message):
-    text = Message.Body
+def reply_http_links(self):
+    text = self.text
     for url in list(re.finditer(URL_RE, text))[:10]:
         url =  url.group()
         if re.match('.+(jpg|jpeg|gif|png|pdf)$', url.lower()):
@@ -182,7 +182,7 @@ def reply_http_links(Message):
             title = re.search(TITLE_RE, html, re.DOTALL).groups()[0]
             title = re.sub(r'\s+', ' ', title)
         if title:
-            Message.Chat.SendMessage('URL title: <%s>' % fix_title(title))
+            self.send('URL title: <%s>' % fix_title(title))
 
 def prepare_wiki_resp(name, article, url):
     name = unicode(name, 'utf-8')
@@ -220,11 +220,11 @@ def get_wiki_resp(article):
         except:
             pass
 
-def reply_wiki_links(Message):
-    text = Message.Body
+def reply_wiki_links(self):
+    text = self.text
     resp = get_wiki_prefix_resp(text.strip())
     if resp:
-        Message.Chat.SendMessage(resp)
+        self.send(resp)
         return
     articles = []
     for a_re in ARTICLE_RE:
@@ -233,27 +233,35 @@ def reply_wiki_links(Message):
     for article in articles[:10]:
         resp = get_wiki_resp(article)
         if resp:
-            Message.Chat.SendMessage(resp)
+            self.send(resp)
 
 def weighted_choice(s):
     return random.choice(sum(([v]*wt for v,wt in s),[]))
 
-def reply_smile(Message):
+def reply_smile(self):
     K = 15
-    text = Message.Body
+    text = self.text
     for bot in BOT:
         if bot in text.lower():
             K = 3
     if random.randint(0, K) == 0:
         smile = weighted_choice(SMILES)
-        Message.Chat.SendMessage(smile)
+        self.send(smile)
 
-def reply_ip(Message):
-    text = Message.Body
+def reply_ip(self):
+    text = self.text
     for ip in list(re.findall(IP_RE, text))[:10]:
         name = socket.gethostbyaddr(ip)[0]
-        Message.Chat.SendMessage(name + ' => ' + ip)
+        self.send(name + ' => ' + ip)
 
+def treat_message(self):
+    reply_http_links(self)
+    reply_wiki_links(self)
+    reply_smile(self)
+    reply_ip(self)
+
+class SkypeMessage(object):
+    pass
 
 class MySkypeEvents:
 
@@ -262,10 +270,10 @@ class MySkypeEvents:
     def MessageStatus(self, Message, Status):
         if Message.Sender != skype.CurrentUser and Message.Datetime > self.last:
             self.last = Message.Datetime
-            reply_http_links(Message)
-            reply_wiki_links(Message)
-            reply_smile(Message)
-            reply_ip(Message)
+            m = SkypeMessage()
+            m.text = Message.Body
+            m.send = Message.Chat.SendMessage
+            treat_message(m)
 
 skype = Skype4Py.Skype(Events=MySkypeEvents())
 skype.Attach()
