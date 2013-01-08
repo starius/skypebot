@@ -70,6 +70,7 @@ WIKIS = (
         'Wikipedia', 'https://en.wikipedia.org/wiki/'),
     (('google', 'ggg', 'гугл', 'гугол', 'гуголь'),
         "Google I'm Feeling Lucky", 'http://www.google.com/search?btnI&q='),
+    (('yandex', 'ya', 'яндекс'), "Yandex", 'http://yandex.ru/yandsearch?text='),
     (('lmgtfy', 'lg'), "Let me google that for you", 'http://lmgtfy.com/?q='),
     (('ud', 'urbandictionary'),
         "Urban Dictionary", 'http://www.urbandictionary.com/define.php?term='),
