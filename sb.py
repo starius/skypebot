@@ -154,13 +154,13 @@ def prepare_wiki_resp(name, article, url):
     return '/me ' + resp
 
 def get_wiki_prefix_resp(article):
+    article = u(article)
     for prefixs, name, url_prefix  in WIKIS:
         for prefix in prefixs:
             for sep in [' ', ':']:
-                prefix1 = prefix + sep
-                article1 = re.sub(u('^' + prefix1), '', u(article), re.I)
-                if article1 != article:
-                    article = article1
+                prefix1 = u(prefix + sep)
+                if article.lower().startswith(prefix1.lower()):
+                    article = article[len(prefix1):]
                     url = url_prefix + article
                     return prepare_wiki_resp(name, article, url)
 
