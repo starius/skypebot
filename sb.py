@@ -68,7 +68,7 @@ WIKIS = (
         'Викиреальность', 'http://wikireality.ru/wiki/'),
     (('w', 'wiki', 'enwiki', 'wikipedia'),
         'Wikipedia', 'https://en.wikipedia.org/wiki/'),
-    (('google', 'ggg'),
+    (('google', 'ggg', 'гугл', 'гугол', 'гуголь'),
         "Google I'm Feeling Lucky", 'http://www.google.com/search?btnI&q='),
     (('lmgtfy', 'lg'), "Let me google that for you", 'http://lmgtfy.com/?q='),
     (('ud', 'urbandictionary'),
