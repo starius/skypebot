@@ -52,13 +52,13 @@ replace = (
     ("&#8275;", "-"),
 )
 
-WIKIS = {
-    'u': ('Urbanculture', 'http://urbanculture.in/'),
-    'l': ('Lurkmore', 'https://lurkmore.to/'),
-    'rw': ('Русская Википедия', 'https://ru.wikipedia.org/wiki/'),
-    'wr': ('Викиреальность', 'http://wikireality.ru/wiki/'),
-    'w': ('Wikipedia', 'https://en.wikipedia.org/wiki/'),
-}
+WIKIS = (
+    ('u', 'Urbanculture', 'http://urbanculture.in/'),
+    ('l', 'Lurkmore', 'https://lurkmore.to/'),
+    ('rw', 'Русская Википедия', 'https://ru.wikipedia.org/wiki/'),
+    ('wr', 'Викиреальность', 'http://wikireality.ru/wiki/'),
+    ('w', 'Wikipedia', 'https://en.wikipedia.org/wiki/'),
+)
 
 def get_res(url):
     url = httplib2.iri2uri(url)
@@ -112,7 +112,7 @@ def reply_wiki_links(Message):
         article = article[2:-2] # strip [[ and ]]
         article = article.replace(' ', '_')
         resp = ''
-        for prefix, (name, url_prefix)  in WIKIS.items():
+        for prefix, name, url_prefix  in WIKIS:
             prefix = prefix + ':'
             if article.lower().startswith(prefix):
                 article = re.sub('^' + prefix, '', article)
@@ -120,9 +120,10 @@ def reply_wiki_links(Message):
                 resp = True
                 break
         if not resp:
-            for prefix, (name, url_prefix)  in WIKIS.items():
+            for prefix, name, url_prefix  in WIKIS:
                 url = url_prefix + article
                 try:
+                    print 'Try ' + url
                     get_res(url)
                     resp = True
                     break
