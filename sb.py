@@ -153,8 +153,7 @@ def prepare_wiki_resp(name, article, url):
     resp = name + ': ' + article + ' ' + url
     return '/me ' + resp
 
-def get_wiki_resp(article):
-    article = article.strip()
+def get_wiki_prefix_resp(article):
     for prefixs, name, url_prefix  in WIKIS:
         for prefix in prefixs:
             for sep in [' ', ':']:
@@ -164,6 +163,12 @@ def get_wiki_resp(article):
                     article = article1
                     url = url_prefix + article
                     return prepare_wiki_resp(name, article, url)
+
+def get_wiki_resp(article):
+    article = article.strip()
+    resp = get_wiki_prefix_resp(article)
+    if resp:
+        return resp
     for prefixs, name, url_prefix  in WIKIS:
         url = url_prefix + article
         try:
@@ -175,6 +180,10 @@ def get_wiki_resp(article):
 
 def reply_wiki_links(Message):
     text = Message.Body
+    resp = get_wiki_prefix_resp(text.strip())
+    if resp:
+        Message.Chat.SendMessage(resp)
+        return
     articles = []
     for a_re in ARTICLE_RE:
         a_re = unicode(a_re, 'utf-8')
