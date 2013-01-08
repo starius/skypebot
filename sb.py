@@ -3,7 +3,6 @@
 import sys
 import datetime
 import re
-import socks
 import socket
 import urllib2
 import httplib2
@@ -20,6 +19,7 @@ ARTICLE_RE = r'\[\[[^\n\[\]]+\]\]'
 IP_RE = r'\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b'
 
 if '--tor' in sys.argv:
+    import socks
     socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS5, "127.0.0.1", 9050)
     socket.socket = socks.socksocket
 
