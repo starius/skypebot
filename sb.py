@@ -75,19 +75,17 @@ def reply_http_links(Message):
     for url in list(re.findall(URL_RE, text))[:10]:
         if re.match('.+(jpg|jpeg|gif|png|pdf)$', url.lower()):
             continue
+        print 'Get URL ' + url
+        res = get_res(url)
+        html = get_html(res)
+        title = ''
         try:
-            res = get_res(url)
-            html = get_html(res)
-            title = ''
-            try:
-                xml = parse(StringIO(html))
-                title = xml.getroot().find('head').find('title').text
-            except:
-                title = re.search(TITLE_RE, html).groups()[0]
-            if title:
-                Message.Chat.SendMessage('URL title: <%s>' % fix_title(title))
-        except Exception, e:
-            print('error getting ' + url + ' ' + str(e))
+            xml = parse(StringIO(html))
+            title = xml.getroot().find('head').find('title').text
+        except:
+            title = re.search(TITLE_RE, html).groups()[0]
+        if title:
+            Message.Chat.SendMessage('URL title: <%s>' % fix_title(title))
 
 def reply_wiki_links(Message):
     text = Message.Body
