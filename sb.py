@@ -164,7 +164,7 @@ def weighted_choice(s):
     return random.choice(sum(([v]*wt for v,wt in s),[]))
 
 def reply_smile(Message):
-    if random.randint(0, 20) == 0:
+    if random.randint(0, 15) == 0:
         smile = weighted_choice(SMILES)
         Message.Chat.SendMessage(smile)
 
