@@ -125,6 +125,8 @@ BOT = (
     u'зюзи',
     u'зюзя',
     u'zuzi',
+    u'uc-т',
+    u'uc-chan',
 )
 
 def u(s):
