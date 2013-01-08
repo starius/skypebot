@@ -60,6 +60,32 @@ WIKIS = (
     ('w', 'Wikipedia', 'https://en.wikipedia.org/wiki/'),
 )
 
+SMILES = (
+    (':3', 10),
+    (':)', 10),
+    (';)', 3),
+    ('o_O', 7),
+    (':/', 3),
+    (':\\', 3),
+    (':|', 5),
+    ('XD', 2),
+    (':p', 10),
+    (':D', 5),
+    (':]', 4),
+    (':*', 4),
+    ('|-)', 4),
+    ('^_^', 7),
+    ('^__^', 5),
+    ('>:3', 2),
+    ('8)', 2),
+    (";'-)", 3),
+    ("(_|_)", 1),
+    ("o/", 6),
+    ("(mooning)", 1),
+    ("(drunk)", 2),
+    ("(facepalm)", 2),
+)
+
 def get_res(url):
     url = httplib2.iri2uri(url)
     req = urllib2.Request(url, None, headers)
@@ -134,9 +160,13 @@ def reply_wiki_links(Message):
             resp = name + ': ' + article.replace('_', ' ') + ' ' + url
             Message.Chat.SendMessage('/me ' + resp)
 
+def weighted_choice(s):
+    return random.choice(sum(([v]*wt for v,wt in s),[]))
+
 def reply_smile(Message):
     if random.randint(0, 20) == 0:
-        Message.Chat.SendMessage(':3')
+        smile = weighted_choice(SMILES)
+        Message.Chat.SendMessage(smile)
 
 def reply_ip(Message):
     text = Message.Body
