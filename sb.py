@@ -32,7 +32,25 @@ headers = {
 good = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя"
 good = set(unicode(good, "utf-8"))
 
-replace = unicode("—- –-", "utf-8")
+replace = (
+    ("—", "-"),
+    ("–", "-"),
+    ("‒", "-"),
+    ("―", "-"),
+    ("⁓", "~"),
+    ("&ndash;", "-"),
+    ("&mdash;", "-"),
+    ("&#x2012;", "-"),
+    ("&#x2013;", "-"),
+    ("&#x2014;", "-"),
+    ("&#x2015;", "-"),
+    ("&#x2053;", "-"),
+    ("&#8210;", "-"),
+    ("&#8211;", "-"),
+    ("&#8212;", "-"),
+    ("&#8213;", "-"),
+    ("&#8275;", "-"),
+)
 
 WIKIS = {
     'u': ('Urbanculture', 'http://urbanculture.in/'),
@@ -63,9 +81,9 @@ def get_html(res):
     return html
 
 def fix_title(title):
-    for from_to in replace.split():
-        f = from_to[0]
-        t = from_to[1]
+    for f, t in replace:
+        f = unicode(f, 'utf-8')
+        t = unicode(t, 'utf-8')
         title = title.replace(f, t)
     title = ''.join(c for c in title if c in good or ord(c) < 128)
     return title
