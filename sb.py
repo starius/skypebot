@@ -140,5 +140,6 @@ class MySkypeEvents:
 skype = Skype4Py.Skype(Events=MySkypeEvents())
 skype.Attach()
 
-_ = input()
+while True:
+    _ = input()
 
