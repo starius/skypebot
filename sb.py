@@ -115,6 +115,17 @@ RANDOM = (
     u'рандомная',
 )
 
+BOT = (
+    u'bot',
+    u'бот',
+    u'ссылк',
+    u'зузя',
+    u'зузи',
+    u'зюзи',
+    u'зюзя',
+    u'zuzi',
+)
+
 def u(s):
     if type(s) == str:
         return unicode(s, 'utf-8')
@@ -222,7 +233,12 @@ def weighted_choice(s):
     return random.choice(sum(([v]*wt for v,wt in s),[]))
 
 def reply_smile(Message):
-    if random.randint(0, 15) == 0:
+    K = 15
+    text = Message.Body
+    for bot in BOT:
+        if bot in text.lower():
+            K = 3
+    if random.randint(0, K) == 0:
         smile = weighted_choice(SMILES)
         Message.Chat.SendMessage(smile)
 
