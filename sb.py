@@ -24,6 +24,9 @@ ARTICLE_RE = (
 )
 IP_RE = r'\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b'
 
+SHORT_HELP_LIMIT = datetime.timedelta(minutes=2)
+FULL_HELP_LIMIT = datetime.timedelta(minutes=10)
+
 if '--tor' in sys.argv:
     import socks
     socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS5, "127.0.0.1", 9050)
@@ -185,6 +188,9 @@ def u(s):
     else:
         return s
 
+def now():
+    return datetime.datetime.now()
+
 def get_res(url):
     url = httplib2.iri2uri(url)
     req = urllib2.Request(url, None, headers)
@@ -307,6 +313,16 @@ def reply_ip(self):
         name = socket.gethostbyaddr(ip)[0]
         self.send(name + ' => ' + ip)
 
+def short_help(self):
+    if self.helps['short'] < now() - SHORT_HELP_LIMIT:
+        self.helps['short'] = now()
+        self.send(HELP_SHORT)
+
+def full_help(self):
+    if self.helps['full'] < now() - FULL_HELP_LIMIT:
+        self.helps['full'] = now()
+        self.send(HELP_FULL)
+
 def reply_help(self):
     text = self.text
     full = False
@@ -315,7 +331,7 @@ def reply_help(self):
             full = True
             break
     if full:
-        self.send(HELP_FULL)
+        full_help(self)
         return
     short = False
     for name in self.names:
@@ -323,7 +339,7 @@ def reply_help(self):
             short = True
             break
     if short:
-        self.send(HELP_SHORT)
+        short_help(self)
 
 def treat_message(self):
     reply_http_links(self)
@@ -332,16 +348,18 @@ def treat_message(self):
     reply_ip(self)
     reply_help(self)
 
-def greet_new(self):
-    self.send(HELP_SHORT)
+def new_helps():
+    return {'short': now() - SHORT_HELP_LIMIT,
+            'full': now() - FULL_HELP_LIMIT}
 
 class SkypeMessage(object):
     pass
 
 class MySkypeEvents:
 
-    last = datetime.datetime.now()
+    last = now()
     chat2len = {}
+    chat2help = {}
 
     def ChatMembersChanged(self, Chat, Message):
         if Chat in self.chat2len and len(Chat.Members) > self.chat2len[Chat]:
@@ -349,20 +367,27 @@ class MySkypeEvents:
             def send(txt):
                 Chat.SendMessage(u(txt))
             m.send = send
-            greet_new(m)
+            if Chat not in self.chat2help:
+                self.chat2help[Chat] = new_helps()
+            m.helps = self.chat2help[Chat]
+            short_help(m)
         self.chat2len[Chat] = len(Chat.Members)
 
     def MessageStatus(self, Message, Status):
-        self.chat2len[Message.Chat] = len(Message.Chat.Members)
+        Chat = Message.Chat
+        self.chat2len[Chat] = len(Chat.Members)
         if Message.Sender != skype.CurrentUser and Message.Datetime > self.last:
             self.last = Message.Datetime
             m = SkypeMessage()
             m.text = Message.Body
             def send(txt):
-                Message.Chat.SendMessage(u(txt))
+                Chat.SendMessage(u(txt))
             m.send = send
             U = skype.CurrentUser
             m.names = [U.FullName, U.DisplayName, U.Handle]
+            if Chat not in self.chat2help:
+                self.chat2help[Chat] = new_helps()
+            m.helps = self.chat2help[Chat]
             treat_message(m)
 
 skype = Skype4Py.Skype(Events=MySkypeEvents())
