@@ -133,6 +133,50 @@ BOT = (
     u'uc-chan',
 )
 
+HELPS = (
+    u'help',
+    u'помощь',
+    u'-h',
+    u'--help',
+    u'справка',
+)
+
+HELP_SHORT = '''
+Привет, я UC-тян! Чтобы узнать, как со мной обращаться, введи !help
+'''
+
+HELP_FULL_TEMPLATE = HELP_SHORT + '''
+Ссылка на статью в вики или другом сайте: имя_вики статья
+    lurk Рей
+    uc Катя Гордон
+    рувики Русский мат
+    enwiki bitcoin
+     ...
+Полный список генераторов ссылок:
+    %(gen)s
+
+Ссылки на статьи можно кидать без указания вики-проекта,
+тогда я буду перебирать проекты по порядку и выдам
+ссылку на первый вики-проект, в котором есть такая статья.
+
+Ссылки на статьи можно оформлять в вики-разметке:
+    А чо, [[УМВР]]
+    Как пропатчить KDE2 под [[FreeBSD]]
+    Любой нормальный анимешник должен хотя бы раз посмотреть [[lm:Евангелион]]
+     ...
+
+Для получения случайной статьи в данной вики:
+    uc случайная
+
+Кидай сюда ссылки, я буду писать, что в них находится.
+
+Если введешь IP-адрес, я выведу немного информации о нем.
+'''
+
+gen = ' '.join(w[0][0] for w in WIKIS)
+
+HELP_FULL = HELP_FULL_TEMPLATE % {'gen': gen}
+
 def u(s):
     if type(s) == str:
         return unicode(s, 'utf-8')
@@ -261,11 +305,22 @@ def reply_ip(self):
         name = socket.gethostbyaddr(ip)[0]
         self.send(name + ' => ' + ip)
 
+def reply_help(self):
+    text = self.text
+    h = False
+    for help in HELPS:
+        if text == help or text[1:] == help:
+            h = True
+            break
+    if h:
+        self.send(HELP_FULL)
+
 def treat_message(self):
     reply_http_links(self)
     reply_wiki_links(self)
     reply_smile(self)
     reply_ip(self)
+    reply_help(self)
 
 class SkypeMessage(object):
     pass
@@ -279,7 +334,9 @@ class MySkypeEvents:
             self.last = Message.Datetime
             m = SkypeMessage()
             m.text = Message.Body
-            m.send = Message.Chat.SendMessage
+            def send(txt):
+                Message.Chat.SendMessage(u(txt))
+            m.send = send
             treat_message(m)
 
 skype = Skype4Py.Skype(Events=MySkypeEvents())
