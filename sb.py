@@ -15,7 +15,12 @@ import Skype4Py
 URL_RE = r'https?://[^\s"\']+'
 CHARSET_RE = r'charset=([^\s\'\"]+)[\'\"]'
 TITLE_RE = r'<title>\s*(.+)\s*</title>'
-ARTICLE_RE = r'\[\[[^\n\[\]]+\]\]'
+ARTICLE_RE = (
+    r'\[\[([^\n\[\]]+)\]\]',
+    r'^! (.+)',
+    r'^wiki (.+)',
+    r'^вики (.+)',
+)
 IP_RE = r'\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b'
 
 if '--tor' in sys.argv:
@@ -134,8 +139,11 @@ def reply_http_links(Message):
 
 def reply_wiki_links(Message):
     text = Message.Body
-    for article in list(re.findall(ARTICLE_RE, text))[:10]:
-        article = article[2:-2] # strip [[ and ]]
+    articles = []
+    for a_re in ARTICLE_RE:
+        a_re = unicode(a_re, 'utf-8')
+        articles += re.findall(a_re, text)
+    for article in articles[:10]:
         article = article.replace(' ', '_')
         resp = ''
         for prefix, name, url_prefix  in WIKIS:
