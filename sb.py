@@ -307,13 +307,21 @@ def reply_ip(self):
 
 def reply_help(self):
     text = self.text
-    h = False
+    full = False
     for help in HELPS:
         if text == help or text[1:] == help:
-            h = True
+            full = True
             break
-    if h:
+    if full:
         self.send(HELP_FULL)
+        return
+    short = False
+    for name in self.names:
+        if name and u(name).lower() in u(text).lower():
+            short = True
+            break
+    if short:
+        self.send(HELP_SHORT)
 
 def treat_message(self):
     reply_http_links(self)
@@ -337,6 +345,8 @@ class MySkypeEvents:
             def send(txt):
                 Message.Chat.SendMessage(u(txt))
             m.send = send
+            U = skype.CurrentUser
+            m.names = [U.FullName, U.DisplayName, U.Handle]
             treat_message(m)
 
 skype = Skype4Py.Skype(Events=MySkypeEvents())
