@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import datetime
 import re
 import socks
 import socket
@@ -125,9 +126,14 @@ def reply_ip(Message):
         name = socket.gethostbyaddr(ip)[0]
         Message.Chat.SendMessage(name + ' => ' + ip)
 
+
 class MySkypeEvents:
+
+    last = datetime.datetime.now()
+
     def MessageStatus(self, Message, Status):
-        if Status == Skype4Py.enums.cmsReceived:
+        if Message.Sender != skype.CurrentUser and Message.Datetime > self.last:
+            self.last = Message.Datetime
             reply_http_links(Message)
             reply_wiki_links(Message)
             reply_smile(Message)
