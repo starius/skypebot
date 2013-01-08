@@ -141,5 +141,5 @@ skype = Skype4Py.Skype(Events=MySkypeEvents())
 skype.Attach()
 
 while True:
-    _ = input()
+    _ = raw_input()
 
