@@ -58,14 +58,16 @@ replace = (
 )
 
 WIKIS = (
-    (('u', 'калча', 'ук'), 'Urbanculture', 'http://urbanculture.in/'),
-    (('l', 'lm', 'лурк', 'лурка', 'лурочка', 'lurk', 'lurka'),
+    (('u', 'калча', 'ук', 'urbanculture'),
+        'Urbanculture', 'http://urbanculture.in/'),
+    (('l', 'lm', 'лурк', 'лурка', 'лурочка', 'Луркоморье', 'lurk', 'lurka'),
         'Lurkmore', 'https://lurkmore.to/'),
-    (('rw', 'вики', 'рв', 'рувики'),
+    (('rw', 'вики', 'рв', 'рувики', 'википедия'),
         'Русская Википедия', 'https://ru.wikipedia.org/wiki/'),
     (('wr', 'вр', 'викиреальность'),
         'Викиреальность', 'http://wikireality.ru/wiki/'),
-    (('w', 'wiki', 'enwiki'), 'Wikipedia', 'https://en.wikipedia.org/wiki/'),
+    (('w', 'wiki', 'enwiki', 'wikipedia'),
+        'Wikipedia', 'https://en.wikipedia.org/wiki/'),
 )
 
 SMILES = (
