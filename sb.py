@@ -31,11 +31,13 @@ good = set(unicode(good, "utf-8"))
 
 replace = unicode("—- –-", "utf-8")
 
-WIKIS = (
-    'http://urbanculture.in/',
-    'https://lurkmore.to/',
-    'https://ru.wikipedia.org/wiki/',
-)
+WIKIS = {
+    'u': ('Urbanculture', 'http://urbanculture.in/'),
+    'l': ('Lurkmore', 'https://lurkmore.to/'),
+    'rw': ('Русская Википедия', 'https://ru.wikipedia.org/wiki/'),
+    'wr': ('Викиреальность', 'http://wikireality.ru/wiki/'),
+    'w': ('Wikipedia', 'https://en.wikipedia.org/wiki/'),
+}
 
 def get_res(url):
     url = httplib2.iri2uri(url)
@@ -89,14 +91,27 @@ def reply_wiki_links(Message):
     for article in list(re.findall(ARTICLE_RE, text))[:10]:
         article = article[2:-2] # strip [[ and ]]
         article = article.replace(' ', '_')
-        for wiki in WIKIS:
-            url = wiki + article
-            try:
-                get_res(url)
-                Message.Chat.SendMessage(url)
+        resp = ''
+        for prefix, (name, url_prefix)  in WIKIS.items():
+            prefix = prefix + ':'
+            if article.lower().startswith(prefix):
+                article = re.sub('^' + prefix, '', article)
+                url = url_prefix + article
+                resp = True
                 break
-            except:
-                pass
+        if not resp:
+            for prefix, (name, url_prefix)  in WIKIS.items():
+                url = url_prefix + article
+                try:
+                    get_res(url)
+                    resp = True
+                    break
+                except:
+                    pass
+        if resp:
+            name = unicode(name, 'utf-8')
+            resp = name + ': ' + article.replace('_', ' ') + ' ' + url
+            Message.Chat.SendMessage('/me ' + resp)
 
 def reply_smile(Message):
     if random.randint(0, 20) == 0:
