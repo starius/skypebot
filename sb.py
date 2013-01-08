@@ -70,7 +70,7 @@ WIKIS = (
         'Wikipedia', 'https://en.wikipedia.org/wiki/'),
     (('google', 'ggg'),
         "Google I'm Feeling Lucky", 'http://www.google.com/search?btnI&q='),
-    (('lmgtfy',), "Let me google that for you", 'http://lmgtfy.com/?q='),
+    (('lmgtfy', 'lg'), "Let me google that for you", 'http://lmgtfy.com/?q='),
     (('ud', 'urbandictionary'),
         "Urban Dictionary", 'http://www.urbandictionary.com/define.php?term='),
     (('gt', 'translate'), "Google Tranlate",
