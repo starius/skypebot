@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import sys
 import re
 import socks
 import socket
@@ -16,9 +17,9 @@ CHARSET_RE = r'charset=([^\s\'\"]+)[\'\"]'
 TITLE_RE = r'<title>\s*([^\n]+)\s*</title>'
 ARTICLE_RE = r'\[\[[^\n\[\]]+\]\]'
 
-# comment following lines to get url directly (without tor)
-socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS5, "127.0.0.1", 9050) # tor
-socket.socket = socks.socksocket
+if '--tor' in sys.argv:
+    socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS5, "127.0.0.1", 9050)
+    socket.socket = socks.socksocket
 
 headers = {
     'User-Agent': 'Mozilla/5.0', # change user-agent (some sites block urllib2)
