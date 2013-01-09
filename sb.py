@@ -232,8 +232,9 @@ def reply_http_links(self):
         html = get_html(res)
         title = ''
         try:
-            xml = parse(StringIO(html))
+            xml = parse(StringIO(html.encode('utf-8')))
             title = xml.getroot().find('head').find('title').text
+            title = u(title)
         except:
             title = re.search(TITLE_RE, html, re.DOTALL).groups()[0]
             title = re.split(TITLE_RE2, title)[0]
