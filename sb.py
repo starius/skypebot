@@ -333,13 +333,6 @@ def reply_help(self):
     if full:
         full_help(self)
         return
-    short = False
-    for name in self.names:
-        if name and u(name).lower() in u(text).lower():
-            short = True
-            break
-    if short:
-        short_help(self)
 
 def treat_message(self):
     reply_http_links(self)
