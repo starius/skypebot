@@ -298,7 +298,7 @@ def weighted_choice(s):
     return random.choice(sum(([v]*wt for v,wt in s),[]))
 
 def reply_smile(self):
-    K = 15
+    K = 20
     text = self.text
     for bot in BOT:
         if bot in text.lower():
