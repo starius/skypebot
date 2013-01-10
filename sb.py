@@ -10,6 +10,7 @@ import httplib2
 import random
 from xml.etree.cElementTree import parse, ElementTree, Element, SubElement
 from cStringIO import StringIO
+import HTMLParser
 
 import Skype4Py
 import bitly
@@ -50,18 +51,6 @@ replace = (
     ("‒", "-"),
     ("―", "-"),
     ("⁓", "~"),
-    ("&ndash;", "-"),
-    ("&mdash;", "-"),
-    ("&#x2012;", "-"),
-    ("&#x2013;", "-"),
-    ("&#x2014;", "-"),
-    ("&#x2015;", "-"),
-    ("&#x2053;", "-"),
-    ("&#8210;", "-"),
-    ("&#8211;", "-"),
-    ("&#8212;", "-"),
-    ("&#8213;", "-"),
-    ("&#8275;", "-"),
 )
 
 WIKIS = (
@@ -211,7 +200,10 @@ def get_html(res):
         html = unicode(html, encoding)
     return html
 
+html_parser = HTMLParser.HTMLParser()
+
 def fix_title(title):
+    title = u(html_parser.unescape(title))
     for f, t in replace:
         f = unicode(f, 'utf-8')
         t = unicode(t, 'utf-8')
