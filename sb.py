@@ -45,14 +45,6 @@ headers = {
 good = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя"
 good = set(unicode(good, "utf-8"))
 
-replace = (
-    ("—", "-"),
-    ("–", "-"),
-    ("‒", "-"),
-    ("―", "-"),
-    ("⁓", "~"),
-)
-
 WIKIS = (
     (('uc', 'калча', 'ук', 'urbanculture'),
         'Urbanculture', 'http://urbanculture.in/'),
@@ -204,11 +196,6 @@ html_parser = HTMLParser.HTMLParser()
 
 def fix_title(title):
     title = u(html_parser.unescape(title))
-    for f, t in replace:
-        f = unicode(f, 'utf-8')
-        t = unicode(t, 'utf-8')
-        title = title.replace(f, t)
-    title = ''.join(c for c in title if c in good or ord(c) < 128)
     return title
 
 def reply_http_links(self):
