@@ -97,6 +97,18 @@ SMILES = (
     ("(facepalm)", 2),
 )
 
+BB = (
+    ('bb', 10),
+    ('cu', 5),
+    ('cya', 3),
+    ('o_O', 7),
+    ('\o/', 10),
+    ('-1', 10),
+    ('chat--', 10),
+    ('лети птичка', 10),
+    ('gg', 5),
+)
+
 RANDOM = (
     u'случайная',
     u'случайный',
@@ -335,7 +347,7 @@ class MySkypeEvents:
     chat2help = {}
 
     def ChatMembersChanged(self, Chat, Message):
-        if Chat in self.chat2len and len(Chat.Members) > self.chat2len[Chat]:
+        if Chat in self.chat2len:
             m = SkypeMessage()
             def send(txt):
                 Chat.SendMessage(u(txt))
@@ -343,7 +355,11 @@ class MySkypeEvents:
             if Chat not in self.chat2help:
                 self.chat2help[Chat] = new_helps()
             m.helps = self.chat2help[Chat]
-            short_help(m)
+            if len(Chat.Members) > self.chat2len[Chat]:
+                short_help(m)
+            elif len(Chat.Members) < self.chat2len[Chat]:
+                bb = weighted_choice(BB)
+                m.send(bb)
         self.chat2len[Chat] = len(Chat.Members)
 
     def MessageStatus(self, Message, Status):
