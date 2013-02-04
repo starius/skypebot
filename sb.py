@@ -131,6 +131,35 @@ BOT = (
     u'uc-chan',
 )
 
+KEY_WORDS = (
+    u'i2p',
+    u'тор',
+    u'tor',
+    u'цензур',
+    u'реестр',
+    u'лурк',
+    u'lurk',
+    u'google',
+    u'c++',
+    u'с++',
+    u'копирайт',
+    u'пират',
+    u'уязвимост',
+    u'взлом',
+    u'python',
+    u'питон',
+    u'Linux',
+    u'линукс',
+    u'линус',
+    u'linus',
+    u'скайп',
+    u'skype',
+    u'microsoft',
+    u'irc',
+    u'порн',
+    u'porn',
+)
+
 HELPS = (
     u'help',
     u'помощь',
@@ -169,6 +198,8 @@ HELP_FULL_TEMPLATE = HELP_SHORT + '''
 Кидай сюда ссылки, я буду писать, что в них находится.
 
 Если введешь IP-адрес, я выведу немного информации о нем.
+
+Чтобы получить ссылки на последние интересные статьи с хабра, напиши "хабр"
 '''
 
 gen = ' '.join(w[0][0] for w in WIKIS)
@@ -326,12 +357,41 @@ def reply_help(self):
         full_help(self)
         return
 
+def is_good_looking(txt):
+    txt = txt.lower()
+    for pattern in KEY_WORDS:
+        if pattern in txt:
+            return True
+    return False
+
+def reply_habr(self):
+    text = self.text
+    if text == u'хабр' or text == u'habr':
+        xml = parse(get_res('http://habrahabr.ru/rss/hubs/'))
+        rss = xml.getroot()
+        assert rss.tag == 'rss'
+        channel = rss.find('channel')
+        message = u"Статьи с хабра:\n"
+        for item in channel:
+            if item.tag == 'item':
+                txt = ''
+                for e in item:
+                    txt += e.text
+                if is_good_looking(txt):
+                    link = item.find('link').text
+                    title = item.find('title').text
+                    title = title.replace('<![CDATA[', '').replace(']]>', '')
+                    title = title.strip()
+                    message += link + " " + title + "\n"
+        self.send(message)
+
 def treat_message(self):
     reply_http_links(self)
     reply_wiki_links(self)
     reply_smile(self)
     reply_ip(self)
     reply_help(self)
+    reply_habr(self)
 
 def new_helps():
     return {'short': now() - SHORT_HELP_LIMIT,
