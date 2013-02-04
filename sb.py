@@ -160,8 +160,9 @@ KEY_WORDS = (
     u'порн',
     u'porn',
     u'прон',
-    u'pron'
-    u'urban'
+    u'pron',
+    u'urban',
+    u'4pda',
 )
 
 HELPS = (
