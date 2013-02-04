@@ -140,6 +140,7 @@ KEY_WORDS = (
     u'лурк',
     u'lurk',
     u'google',
+    u'гугл',
     u'c++',
     u'с++',
     u'копирайт',
@@ -158,6 +159,9 @@ KEY_WORDS = (
     u'irc',
     u'порн',
     u'porn',
+    u'прон',
+    u'pron'
+    u'urban'
 )
 
 HELPS = (
