@@ -1,4 +1,4 @@
-sudo aptitude install python-skype
+sudo aptitude install python-httplib2 python-skype
 
 for tor:
     sudo aptitude install python-socks
