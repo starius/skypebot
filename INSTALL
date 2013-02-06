@@ -8,3 +8,9 @@ to make bit.y shortener work:
     get API key here: http://bitly.com/a/your_api_key
     set environment vars BITLY_USERNAME and BITLY_KEY
 
+for windows:
+    install python 2.7 http://www.python.org/ftp/python/2.7.3/python-2.7.3.msi
+    install setuptools http://pypi.python.org/packages/2.7/s/setuptools/setuptools-0.6c11.win32-py2.7.exe
+    install httplib2 http://code.google.com/p/httplib2/downloads/detail?name=httplib2-0.7.7.zip
+    install skype4py http://pypi.python.org/packages/source/S/Skype4Py/Skype4Py-1.0.34.zip
+
