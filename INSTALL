@@ -7,6 +7,12 @@ to make bit.y shortener work:
     register an account at http://bit.ly/a/account
     get API key here: http://bitly.com/a/your_api_key
     set environment vars BITLY_USERNAME and BITLY_KEY
+        for windows:
+            SET BITLY_USERNAME=username
+            SET BITLY_KEY=key
+            python sb.py
+        for unix:
+            BITLY_USERNAME=username BITLY_KEY=key python sb.py
 
 for windows:
     install python 2.7 http://www.python.org/ftp/python/2.7.3/python-2.7.3.msi
