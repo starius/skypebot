@@ -412,37 +412,45 @@ class MySkypeEvents:
     chat2help = {}
 
     def ChatMembersChanged(self, Chat, Message):
-        if Chat in self.chat2len:
-            m = SkypeMessage()
-            def send(txt):
-                Chat.SendMessage(u(txt))
-            m.send = send
-            if Chat not in self.chat2help:
-                self.chat2help[Chat] = new_helps()
-            m.helps = self.chat2help[Chat]
-            if len(Chat.Members) > self.chat2len[Chat]:
-                short_help(m)
-            elif len(Chat.Members) < self.chat2len[Chat]:
-                bb = weighted_choice(BB)
-                m.send(bb)
-        self.chat2len[Chat] = len(Chat.Members)
+        try:
+            if Chat in self.chat2len:
+                m = SkypeMessage()
+                def send(txt):
+                    Chat.SendMessage(u(txt))
+                m.send = send
+                if Chat not in self.chat2help:
+                    self.chat2help[Chat] = new_helps()
+                m.helps = self.chat2help[Chat]
+                if len(Chat.Members) > self.chat2len[Chat]:
+                    short_help(m)
+                elif len(Chat.Members) < self.chat2len[Chat]:
+                    bb = weighted_choice(BB)
+                    m.send(bb)
+            self.chat2len[Chat] = len(Chat.Members)
+        except:
+            pass
 
     def MessageStatus(self, Message, Status):
-        Chat = Message.Chat
-        self.chat2len[Chat] = len(Chat.Members)
-        if Message.Sender != skype.CurrentUser and Message.Datetime > self.last:
-            self.last = Message.Datetime
-            m = SkypeMessage()
-            m.text = Message.Body
-            def send(txt):
-                Chat.SendMessage(u(txt))
-            m.send = send
-            U = skype.CurrentUser
-            m.names = [U.FullName, U.DisplayName, U.Handle]
-            if Chat not in self.chat2help:
-                self.chat2help[Chat] = new_helps()
-            m.helps = self.chat2help[Chat]
-            treat_message(m)
+        try:
+            Chat = Message.Chat
+            self.chat2len[Chat] = len(Chat.Members)
+            if Message.Sender != skype.CurrentUser \
+                    and Message.Datetime > self.last:
+                self.last = Message.Datetime
+                m = SkypeMessage()
+                m.text = Message.Body
+                def send(txt):
+                    Chat.SendMessage(u(txt))
+                m.send = send
+                U = skype.CurrentUser
+                m.names = [U.FullName, U.DisplayName, U.Handle]
+                if Chat not in self.chat2help:
+                    self.chat2help[Chat] = new_helps()
+                m.helps = self.chat2help[Chat]
+                treat_message(m)
+        except:
+            pass
+
 
 skype = Skype4Py.Skype(Events=MySkypeEvents())
 skype.Attach()
