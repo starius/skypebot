@@ -3,6 +3,8 @@
 import sys
 import os
 import datetime
+import time
+import thread
 import re
 import socket
 import urllib2
@@ -24,6 +26,13 @@ ARTICLE_RE = (
     r'^! (.+)',
 )
 IP_RE = r'\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b'
+CHANGES = 'http://urbanculture.in/api.php?action=query&list=recentchanges&rcprop=timestamp%7Ctitle%7Cids%7Csizes%7Cflags%7Cuser&format=xml'
+
+BASE_URL = CHANGES.split('api.php')[0]
+
+MWDATEFMT = '%Y-%m-%dT%H:%M:%SZ'
+
+CHANGES_INTERVAL = 60 # seconds
 
 SHORT_HELP_LIMIT = datetime.timedelta(minutes=2)
 FULL_HELP_LIMIT = datetime.timedelta(minutes=10)
@@ -221,6 +230,7 @@ def now():
     return datetime.datetime.now()
 
 def get_res(url):
+    print 'Get URL ' + url
     url = httplib2.iri2uri(url)
     req = urllib2.Request(url, None, headers)
     res = urllib2.urlopen(req)
@@ -242,6 +252,12 @@ def get_html(res):
 
 html_parser = HTMLParser.HTMLParser()
 
+def shorten(url):
+    url = httplib2.iri2uri(url)
+    if len(url) > 40 and BITLY_USERNAME and BITLY_KEY:
+        url = bitly.Api(login=BITLY_USERNAME, apikey=BITLY_KEY).shorten(url)
+    return url
+
 def fix_title(title):
     title = u(html_parser.unescape(title))
     return title
@@ -254,7 +270,6 @@ def reply_http_links(self):
             continue
         if not url.startswith('http'):
             url = 'http://' + url
-        print 'Get URL ' + url
         res = get_res(url)
         html = get_html(res)
         title = ''
@@ -267,15 +282,16 @@ def reply_http_links(self):
             title = re.split(TITLE_RE2, title)[0]
             title = re.sub(r'\s+', ' ', title)
         if title:
-            self.send('URL title: <%s>' % fix_title(title))
+            short_url = shorten(url)
+            if short_url == url:
+                short_url = ''
+            self.send('URL title: <%s> %s' % (fix_title(title), short_url))
 
 def prepare_wiki_resp(name, article, url):
     name = unicode(name, 'utf-8')
     article = article.replace('_', ' ')
     url = url.replace(' ', '%20')
-    url = httplib2.iri2uri(url)
-    if len(url) > 40 and BITLY_USERNAME and BITLY_KEY:
-        url = bitly.Api(login=BITLY_USERNAME, apikey=BITLY_KEY).shorten(url)
+    url = shorten(url)
     resp = name + ': ' + article + ' ' + url
     return '/me ' + resp
 
@@ -390,6 +406,54 @@ def reply_habr(self):
                     message += link + " " + title + "\n"
         self.send(message)
 
+announces = set()
+
+def reply_changes(self):
+    text = self.text
+    if text == u'+changes':
+        announces.add(self.send)
+    if text == u'-changes':
+        announces.remove(self.send)
+
+def test_change(change):
+    return True
+
+last_check = ''
+
+def get_changes():
+    if announces:
+        url = CHANGES
+        lc = globals()['last_check']
+        if lc:
+            url += '&rcend=' + lc.strftime(MWDATEFMT)
+        globals()['last_check'] = datetime.datetime.utcnow()
+        xml = parse(get_res(url))
+        api = xml.getroot()
+        assert api.tag == 'api'
+        changes = api.find('query').find('recentchanges')
+        for change in changes:
+            assert change.tag == 'rc'
+            if test_change(change):
+                user = change.get('user')
+                typ = change.get('type')
+                title = change.get('title')
+                diff = change.get('revid')
+                delta = int(change.get('newlen')) - int(change.get('oldlen'))
+                user_page = shorten(BASE_URL + 'Special:Contributions/' + u(user))
+                if diff == '0':
+                    diff_page = shorten(BASE_URL + title)
+                else:
+                    diff_page = shorten(BASE_URL + '?diff=' + diff)
+                text = '/me ' + typ + ' ' + diff_page + ' ' + title + ' :: ' + \
+                        user + ' ' + user_page
+                if delta:
+                    text += ' :: '
+                    if delta > 0:
+                        text += '+'
+                    text += str(delta)
+                for announce in announces:
+                    announce(text)
+
 def treat_message(self):
     reply_http_links(self)
     reply_wiki_links(self)
@@ -397,6 +461,7 @@ def treat_message(self):
     reply_ip(self)
     reply_help(self)
     reply_habr(self)
+    reply_changes(self)
 
 def new_helps():
     return {'short': now() - SHORT_HELP_LIMIT,
@@ -451,6 +516,15 @@ class MySkypeEvents:
         except:
             pass
 
+def loop_changes():
+    while True:
+        try:
+            get_changes()
+        except:
+            pass
+        time.sleep(CHANGES_INTERVAL)
+
+thread.start_new_thread(loop_changes, ())
 
 skype = Skype4Py.Skype(Events=MySkypeEvents())
 skype.Attach()
