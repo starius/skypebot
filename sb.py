@@ -420,14 +420,13 @@ def reply_changes(self):
 def test_change(change):
     return True
 
-last_check = ''
+last_check = datetime.datetime.utcnow()
 
 def get_changes():
     if announces:
         url = CHANGES
         lc = globals()['last_check']
-        if lc:
-            url += '&rcend=' + lc.strftime(MWDATEFMT)
+        url += '&rcend=' + lc.strftime(MWDATEFMT)
         globals()['last_check'] = datetime.datetime.utcnow()
         xml = parse(get_res(url))
         api = xml.getroot()
