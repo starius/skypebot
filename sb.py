@@ -471,6 +471,15 @@ def new_helps():
 class SkypeMessage(object):
     pass
 
+chat2send = {}
+
+def send_function(Chat):
+    def send(txt):
+        Chat.SendMessage(u(txt))
+    if Chat not in chat2send:
+        chat2send[Chat] = send
+    return chat2send[Chat]
+
 class MySkypeEvents:
 
     last = now()
@@ -481,9 +490,7 @@ class MySkypeEvents:
         try:
             if Chat in self.chat2len:
                 m = SkypeMessage()
-                def send(txt):
-                    Chat.SendMessage(u(txt))
-                m.send = send
+                m.send = send_function(Chat)
                 if Chat not in self.chat2help:
                     self.chat2help[Chat] = new_helps()
                 m.helps = self.chat2help[Chat]
@@ -505,9 +512,7 @@ class MySkypeEvents:
                 self.last = Message.Datetime
                 m = SkypeMessage()
                 m.text = Message.Body
-                def send(txt):
-                    Chat.SendMessage(u(txt))
-                m.send = send
+                m.send = send_function(Chat)
                 U = skype.CurrentUser
                 m.names = [U.FullName, U.DisplayName, U.Handle]
                 if Chat not in self.chat2help:
