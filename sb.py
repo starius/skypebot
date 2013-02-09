@@ -43,6 +43,8 @@ CHANGES_INTERVAL = 60 # seconds
 SHORT_HELP_LIMIT = datetime.timedelta(minutes=2)
 FULL_HELP_LIMIT = datetime.timedelta(minutes=10)
 
+WHOIS_URL = 'https://apps.db.ripe.net/whois/search.xml?source=ripe&query-string='
+
 IRC_SERVER = 'irc.freenode.net'
 IRC_PORT = 6667
 IRC_NICKNAME = 'UC-chan'
@@ -367,11 +369,41 @@ def reply_smile(self):
         smile = weighted_choice(SMILES)
         self.send(smile)
 
+def fc(xml_node, attr_name, attr_value):
+    result = []
+    for child in xml_node:
+        if child.get(attr_name) == attr_value:
+            result.append(child)
+    return result
+
 def reply_ip(self):
     text = self.text
     for ip in list(re.findall(IP_RE, text))[:10]:
-        name = socket.gethostbyaddr(ip)[0]
-        self.send(name + ' => ' + ip)
+        try:
+            name = socket.gethostbyaddr(ip)[0]
+        except:
+            name = ip
+        try:
+            url = WHOIS_URL + ip
+            xml = parse(get_res(url))
+            whois = xml.getroot()
+            assert whois.tag == 'whois-resources'
+            objects = whois.find('objects')
+            country = fc(fc(objects, "type", "inetnum")[0].find('attributes'),
+                    "name", "country")[0].get("value")
+            addr_objects = fc(objects, "type", "person") +\
+                    fc(objects, "type", "role")
+            addr = ', '.join(attr.get('value') for attr in \
+                    fc(addr_objects[0].find('attributes'), "name", "address"))
+            descr = ', '.join(attr.get('value') for attr in \
+                    fc(fc(objects, "type", "inetnum")[0].find('attributes'),
+                    "name", "descr"))
+            route = fc(fc(objects, "type", "route")[0].find('attributes'),
+                    "name", "route")[0].get("value")
+            self.send("%s (%s): %s; %s; %s [Net: %s]" %
+                    (name, ip, country, addr, descr, route))
+        except:
+            self.send("%s (%s)" % (name, ip))
 
 def short_help(self):
     if self.helps['short'] < now() - SHORT_HELP_LIMIT:
