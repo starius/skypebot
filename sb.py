@@ -32,7 +32,7 @@ ARTICLE_RE = (
     r'^! (.+)',
 )
 IP_RE = r'\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b'
-CHANGES = 'http://urbanculture.in/api.php?action=query&list=recentchanges&rcprop=timestamp%7Ctitle%7Cids%7Csizes%7Cflags%7Cuser&format=xml'
+CHANGES = 'http://urbanculture.in/api.php?action=query&list=recentchanges&rcprop=timestamp%7Ctitle%7Cids%7Csizes%7Cflags%7Cuser%7Ccomment&format=xml'
 
 BASE_URL = CHANGES.split('api.php')[0]
 
@@ -441,6 +441,7 @@ def get_changes():
                 typ = change.get('type')
                 title = change.get('title')
                 diff = change.get('revid')
+                comment = change.get('comment')
                 delta = int(change.get('newlen')) - int(change.get('oldlen'))
                 user_page = shorten(BASE_URL + 'Special:Contributions/' + u(user))
                 if diff == '0':
@@ -454,6 +455,8 @@ def get_changes():
                     if delta > 0:
                         text += '+'
                     text += str(delta)
+                if comment:
+                    text += ' :: ' + comment
                 for announce in announces:
                     announce(text)
 
