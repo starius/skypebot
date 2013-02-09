@@ -569,7 +569,7 @@ class MySkypeEvents:
                     m.send(bb)
             self.chat2len[Chat] = len(Chat.Members)
         except:
-            pass
+            print("Skype - members changed error")
 
     def MessageStatus(self, Message, Status):
         try:
@@ -586,18 +586,18 @@ class MySkypeEvents:
                 m.helps = self.chat2help[Chat]
                 treat_message(m)
         except:
-            pass
+            print("Skype - message error")
 
 def loop_changes():
     while True:
         try:
             get_changes()
         except:
-            pass
+            print("Error getting changes")
         try:
             get_habr()
         except:
-            pass
+            print("Error getting habr")
         time.sleep(CHANGES_INTERVAL)
 
 thread.start_new_thread(loop_changes, ())
@@ -638,7 +638,7 @@ if IRC_ENABLED:
                 m.helps = self.helps
                 treat_message(m)
             except:
-                pass
+                print("Irc message error")
 
     bot = TestBot(IRC_CHANNEL, IRC_NICKNAME, IRC_SERVER, IRC_PORT)
     announces.add(bot.send)
