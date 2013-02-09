@@ -194,7 +194,7 @@ HELPS = (
 )
 
 HELP_SHORT = '''
-Привет, я UC-тян! Чтобы узнать, как со мной обращаться, введи !help
+Привет, я UC-тян! Для справки введи help или открой http://pastebin.com/D5Z86FQJ
 '''
 
 HELP_FULL_TEMPLATE = HELP_SHORT + '''
@@ -580,7 +580,7 @@ if IRC_ENABLED:
     class TestBot(SingleServerIRCBot):
         def __init__(self, channel, nick, server, port=6667):
             def send(txt):
-                for m in txt.split('\n'):
+                for m in txt.split('\n')[:3]:
                     m = u(m).encode('utf8')
                     if m.lower().startswith("/me"):
                         self.connection.action(IRC_CHANNEL, m[4:])
