@@ -14,6 +14,9 @@ to make bit.y shortener work:
         for unix:
             BITLY_USERNAME=username BITLY_KEY=key python sb.py
 
+to enable IRC:
+    sudo aptitude install python-irclib
+
 for windows:
     install python 2.7 http://www.python.org/ftp/python/2.7.3/python-2.7.3.msi
     install setuptools http://pypi.python.org/packages/2.7/s/setuptools/setuptools-0.6c11.win32-py2.7.exe

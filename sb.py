@@ -17,6 +17,12 @@ import HTMLParser
 import Skype4Py
 import bitly
 
+IRC_ENABLED = True
+try:
+    from ircbot import SingleServerIRCBot
+except:
+    IRC_ENABLED = False
+
 URL_RE = r'\b(https?://|www\.)[^\s"\']+'
 CHARSET_RE = r'charset=([^\s\'\"]+)[\'\"]'
 TITLE_RE = r'<title>\s*(.+)\s*</title>'
@@ -36,6 +42,11 @@ CHANGES_INTERVAL = 60 # seconds
 
 SHORT_HELP_LIMIT = datetime.timedelta(minutes=2)
 FULL_HELP_LIMIT = datetime.timedelta(minutes=10)
+
+IRC_SERVER = 'irc.freenode.net'
+IRC_PORT = 6667
+IRC_NICKNAME = 'UC-chan'
+IRC_CHANNEL = '#urbanculture'
 
 if '--tor' in sys.argv:
     import socks
@@ -513,8 +524,6 @@ class MySkypeEvents:
                 m = SkypeMessage()
                 m.text = Message.Body
                 m.send = send_function(Chat)
-                U = skype.CurrentUser
-                m.names = [U.FullName, U.DisplayName, U.Handle]
                 if Chat not in self.chat2help:
                     self.chat2help[Chat] = new_helps()
                 m.helps = self.chat2help[Chat]
@@ -534,6 +543,41 @@ thread.start_new_thread(loop_changes, ())
 
 skype = Skype4Py.Skype(Events=MySkypeEvents())
 skype.Attach()
+
+if IRC_ENABLED:
+    class IrcMessage(object):
+        pass
+
+    class TestBot(SingleServerIRCBot):
+        def __init__(self, channel, nick, server, port=6667):
+            def send(txt):
+                for m in txt.split('\n'):
+                    m = u(m).encode('utf8')
+                    if m.lower().startswith("/me"):
+                        self.connection.action(IRC_CHANNEL, m[4:])
+                    else:
+                        self.connection.privmsg(IRC_CHANNEL, m)
+            SingleServerIRCBot.__init__(self, [(server, port)], nick, nick)
+            self.channel = channel
+            self.send = send
+            self.helps = new_helps()
+
+        def on_welcome(self, c, e):
+            c.join(self.channel)
+
+        def on_pubmsg(self, c, e):
+            try:
+                m = IrcMessage()
+                m.text = u(e.arguments()[0])
+                m.send = self.send
+                m.helps = self.helps
+                treat_message(m)
+            except:
+                pass
+
+    bot = TestBot(IRC_CHANNEL, IRC_NICKNAME, IRC_SERVER, IRC_PORT)
+    announces.add(bot.send)
+    bot.start()
 
 while True:
     _ = raw_input()
