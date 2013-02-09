@@ -543,6 +543,9 @@ thread.start_new_thread(loop_changes, ())
 
 skype = Skype4Py.Skype(Events=MySkypeEvents())
 skype.Attach()
+for Chat in skype.RecentChats:
+    if len(Chat.Members) > 2:
+        announces.add(send_function(Chat))
 
 if IRC_ENABLED:
     class IrcMessage(object):
