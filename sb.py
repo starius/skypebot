@@ -226,6 +226,8 @@ HELP_FULL_TEMPLATE = HELP_SHORT + '''
 
 Чтобы получить ссылки на последние интересные статьи с хабра, напиши "хабр"
 
+Чтобы получать интересные статьи с хабра, напиши "+habr", отключить "-habr"
+
 Чтобы получать новые правки, напиши "+changes", чтобы отключить "-changes"
 '''
 
@@ -398,26 +400,14 @@ def is_good_looking(txt):
             return True
     return False
 
+habr_announces = set()
+
 def reply_habr(self):
     text = self.text
-    if text == u'хабр' or text == u'habr':
-        xml = parse(get_res('http://habrahabr.ru/rss/hubs/'))
-        rss = xml.getroot()
-        assert rss.tag == 'rss'
-        channel = rss.find('channel')
-        message = u"Статьи с хабра:\n"
-        for item in channel:
-            if item.tag == 'item':
-                txt = ''
-                for e in item:
-                    txt += e.text
-                if is_good_looking(txt):
-                    link = item.find('link').text
-                    title = item.find('title').text
-                    title = title.replace('<![CDATA[', '').replace(']]>', '')
-                    title = title.strip()
-                    message += link + " " + title + "\n"
-        self.send(message)
+    if text == u'+habr':
+        habr_announces.add(self.send)
+    if text == u'-habr':
+        habr_announces.remove(self.send)
 
 announces = set()
 
@@ -465,6 +455,37 @@ def get_changes():
                     text += str(delta)
                 for announce in announces:
                     announce(text)
+
+last_habr = 0
+
+def get_habr():
+    if habr_announces:
+        lb = globals()['last_habr']
+        new_lb = lb
+        xml = parse(get_res('http://habrahabr.ru/rss/hubs/'))
+        rss = xml.getroot()
+        assert rss.tag == 'rss'
+        channel = rss.find('channel')
+        message = u""
+        for item in channel:
+            if item.tag == 'item':
+                txt = ''
+                for e in item:
+                    txt += e.text
+                if is_good_looking(txt):
+                    link = item.find('link').text
+                    title = item.find('title').text
+                    title = title.replace('<![CDATA[', '').replace(']]>', '')
+                    title = title.strip()
+                    number = int(re.search("(\d+)", link).group())
+                    if number > last_habr and last_habr != 0:
+                        new_lb = number
+                        if last_habr != 0:
+                            message += link + " " + title + "\n"
+        globals()['last_habr'] = new_lb
+        if message:
+            for announce in habr_announces:
+                announce(message)
 
 def treat_message(self):
     reply_http_links(self)
@@ -537,6 +558,10 @@ def loop_changes():
             get_changes()
         except:
             pass
+        try:
+            get_habr()
+        except:
+            pass
         time.sleep(CHANGES_INTERVAL)
 
 thread.start_new_thread(loop_changes, ())
@@ -546,6 +571,7 @@ skype.Attach()
 for Chat in skype.RecentChats:
     if len(Chat.Members) > 2:
         announces.add(send_function(Chat))
+        habr_announces.add(send_function(Chat))
 
 if IRC_ENABLED:
     class IrcMessage(object):
@@ -580,6 +606,7 @@ if IRC_ENABLED:
 
     bot = TestBot(IRC_CHANNEL, IRC_NICKNAME, IRC_SERVER, IRC_PORT)
     announces.add(bot.send)
+    habr_announces.add(bot.send)
     bot.start()
 
 while True:
