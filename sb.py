@@ -154,37 +154,37 @@ BOT = (
 )
 
 KEY_WORDS = (
-    u'i2p',
-    u'тор',
-    u'tor',
-    u'цензур',
-    u'реестр',
-    u'лурк',
-    u'lurk',
-    u'google',
-    u'гугл',
-    u'c++',
-    u'с++',
-    u'копирайт',
-    u'пират',
-    u'уязвимост',
-    u'взлом',
-    u'python',
-    u'питон',
-    u'Linux',
-    u'линукс',
-    u'линус',
-    u'linus',
-    u'скайп',
-    u'skype',
-    u'microsoft',
-    u'irc',
-    u'порн',
-    u'porn',
-    u'прон',
-    u'pron',
-    u'urban',
-    u'4pda',
+    ur'i2p',
+    ur'\bтор\b',
+    ur'\btor\b',
+    ur'цензур',
+    ur'реестр',
+    ur'лурк',
+    ur'lurk',
+    ur'google',
+    ur'гугл',
+    ur'c++',
+    ur'с++',
+    ur'копирайт',
+    ur'пират',
+    ur'уязвимост',
+    ur'взлом',
+    ur'python',
+    ur'питон',
+    ur'Linux',
+    ur'линукс',
+    ur'линус',
+    ur'linus',
+    ur'скайп',
+    ur'skype',
+    ur'microsoft',
+    ur'irc',
+    ur'порн',
+    ur'porn',
+    ur'прон',
+    ur'pron',
+    ur'urban',
+    ur'4pda',
 )
 
 HELPS = (
@@ -429,7 +429,7 @@ def reply_help(self):
 def is_good_looking(txt):
     txt = txt.lower()
     for pattern in KEY_WORDS:
-        if pattern in txt:
+        if re.search(pattern, txt):
             return True
     return False
 
