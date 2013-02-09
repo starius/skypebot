@@ -269,8 +269,9 @@ html_parser = HTMLParser.HTMLParser()
 
 def shorten(url):
     url = httplib2.iri2uri(url)
-    if len(url) > 40 and BITLY_USERNAME and BITLY_KEY:
-        url = bitly.Api(login=BITLY_USERNAME, apikey=BITLY_KEY).shorten(url)
+    if BITLY_USERNAME and BITLY_KEY:
+        if len(url) > 40 or ':' in url:
+            url = bitly.Api(login=BITLY_USERNAME, apikey=BITLY_KEY).shorten(url)
     return url
 
 def fix_title(title):
