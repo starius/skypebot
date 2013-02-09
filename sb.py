@@ -518,9 +518,9 @@ def get_habr():
                     title = title.replace('<![CDATA[', '').replace(']]>', '')
                     title = title.strip()
                     number = int(re.search("(\d+)", link).group())
-                    if number > last_habr and last_habr != 0:
-                        new_lb = number
-                        if last_habr != 0:
+                    if number > lb:
+                        new_lb = max(number, new_lb)
+                        if lb != 0:
                             message += link + " " + title + "\n"
         globals()['last_habr'] = new_lb
         if message:
