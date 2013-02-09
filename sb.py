@@ -452,7 +452,11 @@ def reply_changes(self):
         announces.remove(self.send)
 
 def test_change(change):
-    return True
+    typ = change.get('type')
+    user = change.get('user')
+    delta = int(change.get('newlen')) - int(change.get('oldlen'))
+    anon = change.get('anon')
+    return typ != 'change' or re.search(IP_RE, user) or anon or abs(delta) > 500
 
 last_check = datetime.datetime.utcnow()
 
