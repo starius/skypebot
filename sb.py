@@ -456,7 +456,7 @@ def test_change(change):
     user = change.get('user')
     delta = int(change.get('newlen')) - int(change.get('oldlen'))
     anon = change.get('anon')
-    return typ != 'change' or re.search(IP_RE, user) or anon or abs(delta) > 500
+    return typ != 'edit' or re.search(IP_RE, user) or anon or abs(delta) > 500
 
 last_check = datetime.datetime.utcnow()
 
