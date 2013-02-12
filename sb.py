@@ -629,7 +629,6 @@ skype.Attach()
 for Chat in skype.RecentChats:
     if len(Chat.Members) > 2:
         url2announces[UC_CHANGES].add(send_function(Chat))
-        url2announces[LURK_CHANGES].add(send_function(Chat))
         habr_announces.add(send_function(Chat))
 
 if IRC_ENABLED:
