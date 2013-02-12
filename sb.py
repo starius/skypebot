@@ -332,7 +332,7 @@ def get_wiki_prefix_resp(article):
                     return prepare_wiki_resp(name, article, url)
 
 def get_wiki_resp(article):
-    article = article.strip()
+    article = article.split(u'|')[0].strip()
     resp = get_wiki_prefix_resp(article)
     if resp:
         return resp
