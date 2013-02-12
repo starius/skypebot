@@ -32,9 +32,12 @@ ARTICLE_RE = (
     r'^! (.+)',
 )
 IP_RE = r'\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b'
-CHANGES = 'http://urbanculture.in/api.php?action=query&list=recentchanges&rcprop=timestamp%7Ctitle%7Cids%7Csizes%7Cflags%7Cuser%7Ccomment&format=xml'
 
-BASE_URL = CHANGES.split('api.php')[0]
+CHANGES_TEMPLATE = '/api.php?action=query&list=recentchanges&' +\
+    'rcprop=timestamp%7Ctitle%7Cids%7Csizes%7Cflags%7Cuser%7Ccomment&format=xml'
+
+UC_CHANGES = 'http://urbanculture.in' + CHANGES_TEMPLATE
+LURK_CHANGES = 'http://lurkmore.to' + CHANGES_TEMPLATE
 
 MWDATEFMT = '%Y-%m-%dT%H:%M:%SZ'
 
@@ -196,7 +199,7 @@ HELPS = (
 )
 
 HELP_SHORT = '''
-Привет, я UC-тян! Для справки введи help или открой http://pastebin.com/D5Z86FQJ
+Привет, я UC-тян! Для справки введи help или открой http://pastebin.com/V59Le8Tj
 '''
 
 HELP_FULL_TEMPLATE = HELP_SHORT + '''
@@ -230,7 +233,8 @@ HELP_FULL_TEMPLATE = HELP_SHORT + '''
 
 Чтобы получать интересные статьи с хабра, напиши "+habr", отключить "-habr"
 
-Чтобы получать новые правки, напиши "+changes", чтобы отключить "-changes"
+Чтобы получать новые правки с urbanculture или лурка,
+напиши "+uc" или "+lurk", чтобы отключить "-uc" или "-lurk"
 '''
 
 gen = ' '.join(w[0][0] for w in WIKIS)
@@ -442,14 +446,20 @@ def reply_habr(self):
     if text == u'-habr':
         habr_announces.remove(self.send)
 
-announces = set()
+url2announces = {}
+url2announces[UC_CHANGES] = set()
+url2announces[LURK_CHANGES] = set()
 
 def reply_changes(self):
     text = self.text
-    if text == u'+changes':
-        announces.add(self.send)
-    if text == u'-changes':
-        announces.remove(self.send)
+    if text == u'+uc':
+        url2announces[UC_CHANGES].add(self.send)
+    if text == u'-uc':
+        url2announces[UC_CHANGES].remove(self.send)
+    if text == u'+lurk':
+        url2announces[LURK_CHANGES].add(self.send)
+    if text == u'-lurk':
+        url2announces[LURK_CHANGES].remove(self.send)
 
 def test_change(change):
     typ = change.get('type')
@@ -461,11 +471,13 @@ def test_change(change):
 last_check = datetime.datetime.utcnow()
 
 def get_changes():
-    if announces:
-        url = CHANGES
-        lc = globals()['last_check']
+    lc = globals()['last_check']
+    globals()['last_check'] = datetime.datetime.utcnow()
+    for changes_url, announces in url2announces.items():
+        if not announces:
+            continue
+        url = changes_url
         url += '&rcend=' + lc.strftime(MWDATEFMT)
-        globals()['last_check'] = datetime.datetime.utcnow()
         xml = parse(get_res(url))
         api = xml.getroot()
         assert api.tag == 'api'
@@ -479,11 +491,12 @@ def get_changes():
                 diff = change.get('revid')
                 comment = change.get('comment')
                 delta = int(change.get('newlen')) - int(change.get('oldlen'))
-                user_page = shorten(BASE_URL + 'Special:Contributions/' + u(user))
+                base_url = changes_url.split('api.php')[0]
+                user_page = shorten(base_url + 'Special:Contributions/' + u(user))
                 if diff == '0':
-                    diff_page = shorten(BASE_URL + title)
+                    diff_page = shorten(base_url + title)
                 else:
-                    diff_page = shorten(BASE_URL + '?diff=' + diff)
+                    diff_page = shorten(base_url + '?diff=' + diff)
                 text = '/me ' + typ + ' ' + diff_page + ' ' + title + ' :: ' + \
                         user + ' ' + user_page
                 if delta:
@@ -610,7 +623,8 @@ skype = Skype4Py.Skype(Events=MySkypeEvents())
 skype.Attach()
 for Chat in skype.RecentChats:
     if len(Chat.Members) > 2:
-        announces.add(send_function(Chat))
+        url2announces[UC_CHANGES].add(send_function(Chat))
+        url2announces[LURK_CHANGES].add(send_function(Chat))
         habr_announces.add(send_function(Chat))
 
 if IRC_ENABLED:
@@ -645,7 +659,7 @@ if IRC_ENABLED:
                 print("Irc message error")
 
     bot = TestBot(IRC_CHANNEL, IRC_NICKNAME, IRC_SERVER, IRC_PORT)
-    announces.add(bot.send)
+    url2announces[UC_CHANGES].add(bot.send)
     habr_announces.add(bot.send)
     bot.start()
 
