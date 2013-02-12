@@ -462,11 +462,14 @@ def reply_changes(self):
         url2announces[LURK_CHANGES].remove(self.send)
 
 def test_change(change):
+    title = change.get('title')
     typ = change.get('type')
     user = change.get('user')
     delta = int(change.get('newlen')) - int(change.get('oldlen'))
     anon = change.get('anon')
-    return typ != 'edit' or re.search(IP_RE, user) or anon or abs(delta) > 500
+    if u'Обсуждение файла' in title or 'Файл' in title:
+        return False
+    return typ != 'edit' or abs(delta) > 500
 
 last_check = datetime.datetime.utcnow()
 
@@ -498,7 +501,9 @@ def get_changes():
                 else:
                     diff_page = shorten(base_url + '?diff=' + diff)
                 text = '/me ' + typ + ' ' + diff_page + ' ' + title + ' :: ' + \
-                        user + ' ' + user_page
+                        user
+                if user != '127.0.0.1':
+                    text += ' ' + user_page
                 if delta:
                     text += ' :: '
                     if delta > 0:
