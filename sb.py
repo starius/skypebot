@@ -190,6 +190,15 @@ KEY_WORDS = (
     ur'4pda',
 )
 
+BAD_TITLES = (
+    u'Обсуждение',
+    u'Участник',
+    u'Рубрика',
+    u'Файл',
+    u'commentadmin',
+    u'Категория',
+)
+
 HELPS = (
     u'help',
     u'помощь',
@@ -464,13 +473,10 @@ def reply_changes(self):
 def test_change(change):
     title = change.get('title')
     typ = change.get('type')
-    user = change.get('user')
     delta = int(change.get('newlen')) - int(change.get('oldlen'))
-    anon = change.get('anon')
-    if u'Обсуждение файла' in title or u'Файл' in title:
-        return False
-    if u'Участник' in title or u'Обсуждение участника' in title:
-        return False
+    for bad in BAD_TITLES:
+        if bad in title:
+            return False
     return typ != 'edit' or abs(delta) > 500
 
 last_check = datetime.datetime.utcnow()
