@@ -467,7 +467,7 @@ def test_change(change):
     user = change.get('user')
     delta = int(change.get('newlen')) - int(change.get('oldlen'))
     anon = change.get('anon')
-    if u'Обсуждение файла' in title or 'Файл' in title:
+    if u'Обсуждение файла' in title or u'Файл' in title:
         return False
     return typ != 'edit' or abs(delta) > 500
 
