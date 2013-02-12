@@ -469,6 +469,8 @@ def test_change(change):
     anon = change.get('anon')
     if u'Обсуждение файла' in title or u'Файл' in title:
         return False
+    if u'Участник' in title or u'Обсуждение участника' in title:
+        return False
     return typ != 'edit' or abs(delta) > 500
 
 last_check = datetime.datetime.utcnow()
