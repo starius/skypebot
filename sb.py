@@ -322,7 +322,9 @@ def reply_http_links(self):
 
 def prepare_wiki_resp(name, article, url):
     name = unicode(name, 'utf-8')
-    article = article.replace('_', ' ')
+    article = article.replace('_', ' ').strip()
+    if not article:
+        return ""
     url = url.replace(' ', '%20')
     url = shorten(url)
     resp = name + ': ' + article + ' ' + url
