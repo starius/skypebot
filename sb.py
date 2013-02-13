@@ -96,6 +96,8 @@ WIKIS = (
         'http://www.merriam-webster.com/dictionary/')
 )
 
+WIKIS_2 = [(['!' + w for w in ww], descr, url) for (ww, descr, url) in WIKIS]
+
 SMILES = (
     (':3', 10),
     (':)', 10),
@@ -208,15 +210,15 @@ HELPS = (
 )
 
 HELP_SHORT = '''
-Привет, я UC-тян! Для справки введи help или открой http://pastebin.com/V59Le8Tj
+Привет, я UC-тян! Для справки введи help или открой http://pastebin.com/61yq4TwE
 '''
 
 HELP_FULL_TEMPLATE = HELP_SHORT + '''
 Ссылка на статью в вики или другом сайте: имя_вики статья
-    lurk Рей
-    uc Катя Гордон
-    рувики Русский мат
-    enwiki bitcoin
+    !lurk Рей
+    !uc Катя Гордон
+    !рувики Русский мат
+    !enwiki bitcoin
      ...
 Полный список генераторов ссылок:
     %(gen)s
@@ -326,9 +328,9 @@ def prepare_wiki_resp(name, article, url):
     resp = name + ': ' + article + ' ' + url
     return '/me ' + resp
 
-def get_wiki_prefix_resp(article):
+def get_wiki_prefix_resp(article, wikis):
     article = u(article)
-    for prefixs, name, url_prefix  in WIKIS:
+    for prefixs, name, url_prefix  in wikis:
         for prefix in prefixs:
             for sep in [' ', ':']:
                 prefix1 = u(prefix + sep)
@@ -342,7 +344,7 @@ def get_wiki_prefix_resp(article):
 
 def get_wiki_resp(article):
     article = article.split(u'|')[0].strip()
-    resp = get_wiki_prefix_resp(article)
+    resp = get_wiki_prefix_resp(article, WIKIS)
     if resp:
         return resp
     for prefixs, name, url_prefix  in WIKIS:
@@ -356,7 +358,7 @@ def get_wiki_resp(article):
 
 def reply_wiki_links(self):
     text = self.text
-    resp = get_wiki_prefix_resp(text.strip())
+    resp = get_wiki_prefix_resp(text.strip(), WIKIS_2)
     if resp:
         self.send(resp)
         return
