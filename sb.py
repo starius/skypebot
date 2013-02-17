@@ -308,10 +308,13 @@ def reply_http_links(self):
         title = ''
         try:
             xml = parse(StringIO(html.encode('utf-8')))
-            title = xml.getroot().find('head').find('title').text
+            try:
+                title = xml.getroot().find('head').find('title').text
+            except:
+                title = xml.getroot().find('HEAD').find('TITLE').text
             title = u(title)
         except:
-            title = re.search(TITLE_RE, html, re.DOTALL).groups()[0]
+            title = re.search(TITLE_RE, html, re.DOTALL|re.I).groups()[0]
             title = re.split(TITLE_RE2, title)[0]
             title = re.sub(r'\s+', ' ', title)
         if title:
