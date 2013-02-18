@@ -328,6 +328,12 @@ def prepare_wiki_resp(name, article, url):
     article = article.replace('_', ' ').strip()
     if not article:
         return ""
+    if '#' in url:
+        url_hash = url.split('#', 1)[-1]
+        url_hash = httplib2.iri2uri(url_hash)
+        url_hash = url_hash.replace(' ', '_').replace('%', '.')
+        print url_hash
+        url = url.split('#', 1)[0] + '#' + url_hash
     url = url.replace(' ', '%20')
     url = shorten(url)
     resp = name + ': ' + article + ' ' + url
