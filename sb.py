@@ -44,6 +44,7 @@ MWDATEFMT = '%Y-%m-%dT%H:%M:%SZ'
 CHANGES_INTERVAL = 60 # seconds
 
 MAX_TITLE_LENGTH = 175
+SEPARATORS = [' ']
 
 SHORT_HELP_LIMIT = datetime.timedelta(minutes=2)
 FULL_HELP_LIMIT = datetime.timedelta(minutes=10)
@@ -346,7 +347,7 @@ def get_wiki_prefix_resp(article, wikis):
     article = u(article)
     for prefixs, name, url_prefix  in wikis:
         for prefix in prefixs:
-            for sep in [' ', ':']:
+            for sep in SEPARATORS:
                 prefix1 = u(prefix + sep)
                 if article.lower().startswith(prefix1.lower()):
                     article = article[len(prefix1):]
