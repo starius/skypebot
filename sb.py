@@ -43,6 +43,8 @@ MWDATEFMT = '%Y-%m-%dT%H:%M:%SZ'
 
 CHANGES_INTERVAL = 60 # seconds
 
+MAX_TITLE_LENGTH = 175
+
 SHORT_HELP_LIMIT = datetime.timedelta(minutes=2)
 FULL_HELP_LIMIT = datetime.timedelta(minutes=10)
 
@@ -293,6 +295,7 @@ def shorten(url):
 
 def fix_title(title):
     title = u(html_parser.unescape(title))
+    title = title[:MAX_TITLE_LENGTH]
     return title
 
 def reply_http_links(self):
