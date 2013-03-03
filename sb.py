@@ -291,7 +291,11 @@ def shorten(url):
     url = httplib2.iri2uri(url)
     if BITLY_USERNAME and BITLY_KEY:
         if len(url) > 40 or ':' in url:
-            url = bitly.Api(login=BITLY_USERNAME, apikey=BITLY_KEY).shorten(url)
+            try:
+                api = bitly.Api(login=BITLY_USERNAME, apikey=BITLY_KEY)
+                url = api.shorten(url)
+            except:
+                pass
     return url
 
 def fix_title(title):
