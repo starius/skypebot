@@ -645,7 +645,8 @@ class MySkypeEvents:
             Chat = Message.Chat
             self.chat2len[Chat] = len(Chat.Members)
             if Message.Datetime > self.last:
-                skype_logger.skype_log(Message)
+                if Status.startswith('SENT') or Status.startswith('RECEIVED'):
+                    skype_logger.skype_log(Message)
                 if Message.Sender != skype.CurrentUser:
                     self.last = Message.Datetime
                     m = SkypeMessage()
