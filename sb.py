@@ -587,10 +587,14 @@ class SkypeLogger(object):
     def __init__(self):
         self.skype_log_file = None
         self.skype_log_last = now()
+        self.last_phrase = ''
 
     def skype_log(self, Message):
         if not Message.Body:
             return
+        if Message.Body == self.last_phrase:
+            return
+        self.last_phrase = Message.Body
         if self.skype_log_file is None or now().day != self.skype_log_last.day:
             self.skype_log_last = now()
             if self.skype_log_file:
