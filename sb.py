@@ -583,6 +583,28 @@ def new_helps():
     return {'short': now() - SHORT_HELP_LIMIT,
             'full': now() - FULL_HELP_LIMIT}
 
+class SkypeLogger(object):
+    def __init__(self):
+        self.skype_log_file = None
+        self.skype_log_last = now()
+
+    def skype_log(self, Message):
+        if not Message.Body:
+            return
+        if self.skype_log_file is None or now().day != self.skype_log_last.day:
+            self.skype_log_last = now()
+            if self.skype_log_file:
+                self.skype_log_file.close()
+            date = self.skype_log_last.date().isoformat()
+            self.skype_log_file = open(date + ".log", 'a')
+        date = ("%s" % now()).split(".")[0]
+        who = Message.FromDisplayName + '(' + u(Message.FromHandle) + ')'
+        text = date + " " + who + ": " + u(Message.Body)
+        self.skype_log_file.write(text.encode('utf-8') + "\n")
+        self.skype_log_file.flush()
+
+skype_logger = SkypeLogger()
+
 class SkypeMessage(object):
     pass
 
@@ -622,16 +644,17 @@ class MySkypeEvents:
         try:
             Chat = Message.Chat
             self.chat2len[Chat] = len(Chat.Members)
-            if Message.Sender != skype.CurrentUser \
-                    and Message.Datetime > self.last:
-                self.last = Message.Datetime
-                m = SkypeMessage()
-                m.text = Message.Body
-                m.send = send_function(Chat)
-                if Chat not in self.chat2help:
-                    self.chat2help[Chat] = new_helps()
-                m.helps = self.chat2help[Chat]
-                treat_message(m)
+            if Message.Datetime > self.last:
+                skype_logger.skype_log(Message)
+                if Message.Sender != skype.CurrentUser:
+                    self.last = Message.Datetime
+                    m = SkypeMessage()
+                    m.text = Message.Body
+                    m.send = send_function(Chat)
+                    if Chat not in self.chat2help:
+                        self.chat2help[Chat] = new_helps()
+                    m.helps = self.chat2help[Chat]
+                    treat_message(m)
         except:
             print("Skype - message error")
 
