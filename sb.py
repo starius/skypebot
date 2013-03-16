@@ -498,15 +498,18 @@ def test_change(change):
     return typ != 'edit' or abs(delta) > 500
 
 last_check = datetime.datetime.utcnow()
+last_rev_id = 0
 
 def get_changes():
-    lc = globals()['last_check']
-    globals()['last_check'] = datetime.datetime.utcnow()
+    lri = globals()['last_rev_id']
+    new_lri = lri
     for changes_url, announces in url2announces.items():
         if not announces:
             continue
         url = changes_url
-        url += '&rcend=' + lc.strftime(MWDATEFMT)
+        shift = datetime.timedelta(0, 1.5 * CHANGES_INTERVAL, 0)
+        rcend = datetime.datetime.utcnow() - shift
+        url += '&rcend=' + rcend.strftime(MWDATEFMT)
         xml = parse(get_res(url))
         api = xml.getroot()
         assert api.tag == 'api'
@@ -518,6 +521,9 @@ def get_changes():
                 typ = change.get('type')
                 title = change.get('title')
                 diff = change.get('revid')
+                if int(diff) <= lri:
+                    continue
+                new_lri = max(new_lri, diff)
                 comment = change.get('comment')
                 delta = int(change.get('newlen')) - int(change.get('oldlen'))
                 base_url = changes_url.split('api.php')[0]
@@ -539,6 +545,7 @@ def get_changes():
                     text += ' :: ' + comment
                 for announce in announces:
                     announce(text)
+    globals()['last_rev_id'] = new_lri
 
 last_habr = 0
 
