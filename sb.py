@@ -717,10 +717,16 @@ if IRC_ENABLED:
                 print("Irc message error")
 
     def thread_irc_bot():
-        bot = TestBot(IRC_CHANNEL, IRC_NICKNAME, IRC_SERVER, IRC_PORT)
-        url2announces[UC_CHANGES].add(bot.send)
-        habr_announces.add(bot.send)
-        bot.start()
+        while True:
+            try:
+                bot = TestBot(IRC_CHANNEL, IRC_NICKNAME, IRC_SERVER, IRC_PORT)
+                url2announces[UC_CHANGES].add(bot.send)
+                habr_announces.add(bot.send)
+                bot.start()
+            except KeyboardInterrupt:
+                break
+            except:
+                print 'irc error - restart'
     thread.start_new_thread(thread_irc_bot, ())
 
 class PrintMessage(object):
