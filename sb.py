@@ -652,6 +652,16 @@ class MySkypeEvents:
         except:
             print("Skype - members changed error")
 
+    def is_overlord(self, Message):
+        Chat = Message.Chat
+        if Message.Sender == Chat.Adder:
+            return True
+        for member in Chat.MemberObjects:
+            if member.Handle == Message.FromHandle and \
+                    member.Role == Skype4Py.enums.chatMemberRoleMaster:
+                return True
+        return False
+
     def MessageStatus(self, Message, Status):
         try:
             Chat = Message.Chat
@@ -668,6 +678,12 @@ class MySkypeEvents:
                         self.chat2help[Chat] = new_helps()
                     m.helps = self.chat2help[Chat]
                     treat_message(m)
+                    # skype-specific commands
+                    if self.is_overlord(Message):
+                        words = Message.Body.split()
+                        if words and words[0] == '!kick':
+                            for bad_guy in words[1:]:
+                                Chat.SendMessage("/kick " + bad_guy)
         except:
             print("Skype - message error")
 
