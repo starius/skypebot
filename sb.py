@@ -20,6 +20,7 @@ import bitly
 IRC_ENABLED = True
 try:
     from ircbot import SingleServerIRCBot
+    import irclib
 except:
     IRC_ENABLED = False
 
@@ -210,7 +211,7 @@ HELPS = (
 )
 
 HELP_SHORT = '''
-Привет, я UC-тян! Для справки введи help или открой http://pastebin.com/61yq4TwE
+Привет, я UC-тян! Для справки введи help или открой http://pastebin.com/Jhijn5Y1
 '''
 
 HELP_FULL_TEMPLATE = HELP_SHORT + '''
@@ -246,6 +247,8 @@ HELP_FULL_TEMPLATE = HELP_SHORT + '''
 
 Чтобы получать новые правки с urbanculture или лурка,
 напиши "+uc" или "+lurk", чтобы отключить "-uc" или "-lurk"
+
+А ещё есть команда !кто <сказуемое>
 '''
 
 gen = ' '.join(w[0][0] for w in WIKIS)
@@ -488,6 +491,20 @@ def reply_changes(self):
     if text == u'-lurk':
         url2announces[LURK_CHANGES].remove(self.send)
 
+active_members = {}
+
+def reply_who(self):
+    channel = self.channel
+    if channel not in active_members:
+        active_members[channel] = set()
+    sender = self.sender
+    active_members[channel].add(sender)
+    text = self.text
+    if text.startswith(u"!who") or text.startswith(u"!кто"):
+        verb = text[4:].strip()
+        nick = random.choice(list(active_members[channel]))
+        self.send(nick + " " + verb)
+
 def test_change(change):
     title = change.get('title')
     typ = change.get('type')
@@ -586,6 +603,7 @@ def treat_message(self):
     reply_help(self)
     reply_habr(self)
     reply_changes(self)
+    reply_who(self)
 
 def new_helps():
     return {'short': now() - SHORT_HELP_LIMIT,
@@ -673,6 +691,8 @@ class MySkypeEvents:
                     self.last = Message.Datetime
                     m = SkypeMessage()
                     m.text = Message.Body
+                    m.channel = Message.ChatName
+                    m.sender = Message.FromDisplayName
                     m.send = send_function(Chat)
                     if Chat not in self.chat2help:
                         self.chat2help[Chat] = new_helps()
@@ -732,6 +752,8 @@ if IRC_ENABLED:
             try:
                 m = IrcMessage()
                 m.text = u(e.arguments()[0])
+                m.channel = "irc"
+                m.sender = u(irclib.nm_to_n(e.source()))
                 m.send = self.send
                 m.helps = self.helps
                 treat_message(m)
